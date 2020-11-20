@@ -1,0 +1,11 @@
+{
+    "num_epochs": 10,
+    "cuda_device": -1,
+    
+    "optimizer": {
+      "type": "adam",
+      "parameters": {
+          "learning_rate": 0.001
+      }
+    }
+}
