@@ -6,15 +6,19 @@ from torch.utils.data import DataLoader, Dataset, IterableDataset
 import os
 
 class MyDataset(Dataset):
-    def __init__(self, data_path, labels_path, vocab_path, max_length=None):
-        self.data_path = data_path
-        self.labels_path = labels_path
+    def __init__(self, config, train=True):
+        if train:
+            self.data_path = config.train_data_path
+            self.labels_path = config.train_labels_path
+        else:
+            self.data_path = config.test_data_path
+            self.labels_path = config.test_labels_path
 
-        self.vocab_path = vocab_path
+        self.vocab_path = config.vocab_path
         self.vocab = self.read_vocab(self.vocab_path)
         self.vocab_size = len(self.vocab)
 
-        self.max_length = max_length
+        self.max_length = config.max_len
 
         self.data = self.read_data(self.data_path)
         self.labels = self.read_labels(self.labels_path)
@@ -63,15 +67,19 @@ class MyDataset(Dataset):
 
 
 class MyIterableDataset(IterableDataset):
-    def __init__(self, data_path, labels_path, vocab_path, max_length):
-        self.data_path = data_path
-        self.labels_path = labels_path
+    def __init__(self, config, train=True):
+        if train:
+            self.data_path = config.train_data_path
+        else:
+            self.data_path = config.test_data_path
 
-        self.vocab_path = vocab_path
+        self.labels_path = config.labels_path
+
+        self.vocab_path = config.vocab_path
         self.vocab = self.read_vocab(self.vocab_path)
         self.vocab_size = len(self.vocab)
 
-        self.max_length = max_length
+        self.max_length = config.max_len
     
     def read_vocab(self, vocab_path):
         vocab = {}
@@ -103,3 +111,12 @@ class MyIterableDataset(IterableDataset):
         mapped_itr = map(self.process, zip(data_itr, labels_itr))
         
         return mapped_itr
+
+
+class MyDataLoader(DataLoader):
+    def __init__(self, dataset, config):
+        super(MyDataLoader, self).__init__(
+            dataset, 
+            batch_size=config.batch_size, 
+            shuffle=config.shuffle,
+        )
