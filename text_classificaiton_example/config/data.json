@@ -7,12 +7,9 @@
 
     "vocab_path": "data/mr/train/vocab.txt",
 
-    "data_path": "data/t",
-
-    "pretrained_path": "",
 
     "shuffle": "True",
-    "batch_size": 4,
+    "batch_size": 64,
     "max_len": 56,
     "val_ratio": ""
 }

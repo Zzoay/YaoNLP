@@ -5,7 +5,6 @@ from torch.utils.data import DataLoader, Dataset, IterableDataset
 
 import os
 
-
 class MyDataset(Dataset):
     def __init__(self, data_path, labels_path, vocab_path, max_length=None):
         self.data_path = data_path
@@ -39,7 +38,7 @@ class MyDataset(Dataset):
                 max_len = max(len(line.split()) for line in f.readlines())
             tokens_lst = []
             for line in f.readlines():
-                tokens = np.zeros(self.max_length, dtype=np.int32)
+                tokens = np.zeros(self.max_length, dtype=np.int64)
                 for i,word in enumerate(line.split()):
                     try:
                         tokens[i] = self.vocab[word]
@@ -60,7 +59,7 @@ class MyDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        return self.data[idx]
+        return list(zip(self.data, self.labels))[idx]
 
 
 class MyIterableDataset(IterableDataset):
@@ -104,34 +103,3 @@ class MyIterableDataset(IterableDataset):
         mapped_itr = map(self.process, zip(data_itr, labels_itr))
         
         return mapped_itr
-
-
-if __name__ == "__main__":
-    import config_loader
-
-    config = config_loader._load_json("config_example/data.json")
-
-    train_path = config["train_data_path"]
-    test_path = config["test_data_path"]
-
-    vocab_path = config["vocab_path"]
-
-    train_data_path = config["train_data_path"]
-    test_data_path = config["test_data_path"]
-
-    train_labels_path = config["train_labels_path"]
-    test_labels_path = config["test_labels_path"]
-
-    shuffle = config["shuffle"]
-    batch_size = config["batch_size"]
-    max_len = config["max_len"]
-
-    train_dataset = MyDataset(train_data_path, train_labels_path, vocab_path, max_len)
-    test_dataset = MyDataset(test_data_path, test_labels_path, vocab_path, max_len)
-
-    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle)
-    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=shuffle)
-
-    for d in train_dataloader:
-        print(d)
-        break

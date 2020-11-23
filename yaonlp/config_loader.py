@@ -1,29 +1,42 @@
 
 import json
+from types import SimpleNamespace
+from typing import NamedTuple, NewType, Tuple, Any
+from collections import namedtuple
+
+from yaonlp import checker
 
 
-def _load_json(config_path):
-    with open(config_path) as f:
+# add type Config, NameTuple actually
+# Config = Tuple[Any, ...]
+Config = NamedTuple
+
+
+def _load_json(config_file: str) -> dict:
+    with open(config_file) as f:
         dct = json.load(f)
         return dct
 
 
-def load_data_config():
-
-    return
-
-
-def load_model_config():
-
-    return
+def _dct_to_namespace(dct: dict) -> SimpleNamespace:
+    config_nspc = SimpleNamespace(**dct)
+    return config_nspc
 
 
-def load_trainer_config():
+def _dct_to_nametuple(dct: dict) -> Config: 
+    # MyTuple = namedtuple("config", list(dct.keys()))
+    # config_ntpl = MyTuple(**dct)
+    config_ntpl = namedtuple('config', dct.keys())(**dct)
 
-    return
+    return config_ntpl
 
 
-if __name__ == "__main__":
-    with open("config_example/model.json") as f:
-        dct = json.load(f)
-        print(dct)
+def load_config(config_file: str) -> Config: 
+    # config = _dct_to_namespace(_load_json(config_path))
+    config_dct = _load_json(config_file)
+    
+    # check path and filedir
+    checker.check_dirConfig(config_dct)
+
+    config = _dct_to_nametuple(config_dct)
+    return config

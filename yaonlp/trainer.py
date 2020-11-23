@@ -1,32 +1,41 @@
 
+from collections import namedtuple
+from typing import NamedTuple
+# import foo
+
 from torch.utils.data import DataLoader
+import torch.nn as nn
+import torch.nn.functional as F
 
-import config_loader
-from data_helper import MyDataset
+from yaonlp import config_loader
+from yaonlp.data_helper import MyDataset
+
+from torch.optim import *
 
 
-if __name__ == "__main__":
-    config = config_loader._load_json("config_example/data.json")
+class Trainer():
+    def __init__(self, model: nn.Module, config: config_loader.Config) -> None:
+        self.model = model.cuda()
 
-    train_path = config["train_data_path"]
-    test_path = config["test_data_path"]
+        self.num_epochs = config.num_epochs
+        
+        # choose optimizer automatically 
+        self.optim = globals()[config.optimizer["type"]](self.model.parameters(), **config.optimizer["parameters"])
 
-    vocab_path = config["vocab_path"]
+    def train(self, train_iter: DataLoader):
+        step = 0
+        for epoch in range(1, self.num_epochs+1):
+            for batch in train_iter:
+                batch_x, batch_y = batch
+                batch_x, batch_y = batch_x.cuda(), batch_y.cuda()
 
-    train_data_path = config["train_data_path"]
-    test_data_path = config["test_data_path"]
+                self.optim.zero_grad()
+                logit = self.model(batch_x)
 
-    train_labels_path = config["train_labels_path"]
-    test_labels_path = config["test_labels_path"]
+                loss = F.cross_entropy(logit, batch_y)
+                loss.backward()
+                self.optim.step()
 
-    shuffle = config["shuffle"]
-    batch_size = config["batch_size"]
-    max_len = config["max_len"]
-
-    train_dataset = MyDataset(train_data_path, train_labels_path, vocab_path, max_len)
-    test_dataset = MyDataset(test_data_path, test_labels_path, vocab_path, max_len)
-
-    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle)
-    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=shuffle)
-
-    print()
+                if step % 10 == 0:
+                    print(f"step: {step}, loss: {loss}")
+                step += 1

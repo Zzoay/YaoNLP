@@ -3,9 +3,9 @@
     "cuda_device": -1,
     
     "optimizer": {
-      "type": "adam",
+      "type": "Adam",
       "parameters": {
-          "learning_rate": 0.001
+        "lr": 0.001
       }
     }
 }

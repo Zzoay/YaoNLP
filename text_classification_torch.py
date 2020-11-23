@@ -144,11 +144,11 @@ def train(train_iter, val_iter, test_iter, model, epochs):
 
 
 if __name__ == "__main__":
-    corpus = 'sst1'
+    corpus = 'mr'
 
-    data_path = '{}/data.txt'.format(corpus)
-    labels_path = '{}/labels.txt'.format(corpus)
-    vocab_path = '{}/vocab.txt'.format(corpus)
+    data_path = 'data/{}/data.txt'.format(corpus)
+    labels_path = 'data/{}/labels.txt'.format(corpus)
+    vocab_path = 'data/{}/vocab.txt'.format(corpus)
 
     train_test_bound = 7680
     validation = True
@@ -181,7 +181,6 @@ if __name__ == "__main__":
 
     test_size = features_size - train_test_bound
 
-    val = []
     train_data, test_data = data[:train_test_bound], data[train_test_bound:]
     if validation:
         train_data, val_data = torch.utils.data.random_split(train_data, [train_size, val_size])
