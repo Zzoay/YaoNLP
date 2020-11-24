@@ -1,6 +1,6 @@
 {
     "type": "cnn",
-    "embed_dim": 32,
+    "embed_dim": 300,
     "class_num": 5,
     "kernel_num" :100,
     "kernel_sizes" : [3, 4, 5],

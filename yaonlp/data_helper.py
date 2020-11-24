@@ -1,7 +1,7 @@
 
 import numpy as np
 import torch
-from torch.utils.data import DataLoader, Dataset, IterableDataset
+from torch.utils.data import DataLoader, Dataset, IterableDataset, random_split
 
 import os
 
@@ -120,3 +120,13 @@ class MyDataLoader(DataLoader):
             batch_size=config.batch_size, 
             shuffle=config.shuffle,
         )
+    
+    def __len__(self):
+        return len(self.dataset)
+
+
+def train_val_split(train_dataset: Dataset, config) -> [Dataset, Dataset]:
+    size = len(train_dataset)
+    val_size = int(size * config.val_ratio)
+    train_size = size - val_size
+    return random_split(train_dataset, [train_size, val_size])

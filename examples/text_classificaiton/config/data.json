@@ -11,5 +11,5 @@
     "shuffle": "True",
     "batch_size": 64,
     "max_len": 56,
-    "val_ratio": ""
+    "val_ratio": 0.1
 }
