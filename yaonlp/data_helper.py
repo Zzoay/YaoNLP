@@ -63,7 +63,7 @@ class MyDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        return list(zip(self.data, self.labels))[idx]
+        return self.data[idx], self.labels[idx]
 
 
 class MyIterableDataset(IterableDataset):
