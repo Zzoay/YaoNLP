@@ -13,9 +13,6 @@ from yaonlp.config_loader import Config
 from model import TextCNN
 
 
-# torch.cuda.set_device(0)
-
-
 if __name__ == "__main__":
     data_config = config_loader.load_config("examples/text_classificaiton/config/data.json")
     model_config = config_loader.load_config("examples/text_classificaiton/config/model.json")

@@ -6,7 +6,6 @@ import torch.nn.functional as F
 
 
 class TextCNN(nn.Module):
-    
     def __init__(self, params):
         super(TextCNN, self).__init__()
         
@@ -26,9 +25,6 @@ class TextCNN(nn.Module):
         
         x = x.unsqueeze(1)  # [batch_size, 1, sentence_len, embed_dim]
         
-        conv_outputs = []
-        for conv in self.convs:
-            tmp = conv(x)
         x = [F.relu(conv(x)).squeeze(3) for conv in self.convs] 
         x = [F.max_pool1d(i, i.size(2)).squeeze(2) for i in x]  # [(N, Co), ...]*len(Ks)
         x = torch.cat(x, 1)

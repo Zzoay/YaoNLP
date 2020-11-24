@@ -22,10 +22,10 @@ class Trainer():
         self.optim_type = config.optimizer["type"]
         self.optim_params = config.optimizer["parameters"]
 
-    def train(self, model: nn.Module, train_iter: DataLoader, val_iter: DataLoader):
+    def train(self, model: nn.Module, train_iter: DataLoader, val_iter: DataLoader) -> None:
         if torch.cuda.is_available():
             model.cuda()
-        # # choose optimizer automatically 
+        # choose optimizer automatically 
         optim = globals()[self.optim_type](model.parameters(), **self.optim_params)
 
         step = 0
@@ -52,7 +52,7 @@ class Trainer():
                 step += 1
 
     # test and val func
-    def test(self, model: nn.Module, test_iter: DataLoader):
+    def test(self, model: nn.Module, test_iter: DataLoader) -> None:
         corrects, avg_loss = 0, 0
         for batch in test_iter:
             batch_x, batch_y = batch

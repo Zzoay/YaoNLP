@@ -4,9 +4,13 @@ import torch
 from torch.utils.data import DataLoader, Dataset, IterableDataset, random_split
 
 import os
+from typing import List, Any
+
+from yaonlp.config_loader import Config
+
 
 class MyDataset(Dataset):
-    def __init__(self, config, train=True):
+    def __init__(self, config: Config, train=True) -> None:
         if train:
             self.data_path = config.train_data_path
             self.labels_path = config.train_labels_path
@@ -23,9 +27,9 @@ class MyDataset(Dataset):
         self.data = self.read_data(self.data_path)
         self.labels = self.read_labels(self.labels_path)
 
-    def read_vocab(self, vocab_path):
+    def read_vocab(self, vocab_file: str) -> dict:
         vocab = {}
-        with open(vocab_path, "r") as f:
+        with open(vocab_file, "r") as f:
             cnt = 1
             for line in f.readlines():
                 word = line.split()[0]
@@ -34,8 +38,8 @@ class MyDataset(Dataset):
                 cnt += 1
         return vocab
 
-    def read_data(self, data_path):
-        with open(data_path, "r") as f:
+    def read_data(self, data_file: str) -> torch.Tensor:
+        with open(data_file, "r") as f:
             if self.max_length:
                 max_len = self.max_length
             else:
@@ -52,9 +56,9 @@ class MyDataset(Dataset):
                 tokens_lst.append(tokens)
         return torch.tensor(tokens_lst)
 
-    def read_labels(self, labels_path):
+    def read_labels(self, labels_file: str) -> torch.Tensor:
         labels = []
-        with open(labels_path, "r") as f:
+        with open(labels_file, "r") as f:
             for line in f.readlines():
                 labels.append(int(line))
         return torch.tensor(labels)
@@ -62,7 +66,7 @@ class MyDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int):
         return self.data[idx], self.labels[idx]
 
 
@@ -114,7 +118,7 @@ class MyIterableDataset(IterableDataset):
 
 
 class MyDataLoader(DataLoader):
-    def __init__(self, dataset, config):
+    def __init__(self, dataset, config) -> None:
         super(MyDataLoader, self).__init__(
             dataset, 
             batch_size=config.batch_size, 
@@ -125,8 +129,8 @@ class MyDataLoader(DataLoader):
         return len(self.dataset)
 
 
-def train_val_split(train_dataset: Dataset, config) -> [Dataset, Dataset]:
+def train_val_split(train_dataset: Dataset, config) -> List: # List[Subset] actually
     size = len(train_dataset)
     val_size = int(size * config.val_ratio)
     train_size = size - val_size
-    return random_split(train_dataset, [train_size, val_size])
+    return random_split(train_dataset, (train_size, val_size), None)

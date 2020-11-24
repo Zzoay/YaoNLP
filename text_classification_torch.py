@@ -6,7 +6,6 @@ import torch.nn.functional as F
 
 
 class MyDataset(Dataset):
-    
     def __init__(self, data_path, vocab_path=None, labels_path=False):
         self.vocab = None
         if vocab_path:
@@ -68,9 +67,6 @@ class TextCNN(nn.Module):
         
         x = x.unsqueeze(1)  # [batch_size, 1, sentence_len, embed_dim]
         
-        conv_outputs = []
-        for conv in self.convs:
-            tmp = conv(x)
         x = [F.relu(conv(x)).squeeze(3) for conv in self.convs] 
         x = [F.max_pool1d(i, i.size(2)).squeeze(2) for i in x]  # [(N, Co), ...]*len(Ks)
         x = torch.cat(x, 1)
@@ -183,7 +179,7 @@ if __name__ == "__main__":
 
     train_data, test_data = data[:train_test_bound], data[train_test_bound:]
     if validation:
-        train_data, val_data = torch.utils.data.random_split(train_data, [train_size, val_size])
+        train_data, val_data = torch.utils.data.random_split(train_data, [train_size, val_size], None)
 
     print("vocab_size : {}".format(vocab_size))
     print("train_size : {}".format(len(train_data)))

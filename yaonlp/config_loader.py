@@ -1,14 +1,13 @@
 
 import json
 from types import SimpleNamespace
-from typing import NamedTuple, NewType, Tuple, Any
+from typing import NamedTuple, Tuple, Any
 from collections import namedtuple
 
 from yaonlp import checker
 
 
 # add type Config, NameTuple actually
-# Config = Tuple[Any, ...]
 Config = NamedTuple
 
 

@@ -2,7 +2,7 @@
 import os
 
 
-def check_dirConfig(config: dict, mode="input"):
+def check_dirConfig(config: dict, mode="input") -> None:
     if mode == "input":
         not_exist_lst = []
         for key, value in config.items():
@@ -33,3 +33,5 @@ def check_dirConfig(config: dict, mode="input"):
                         os.makedirs(path)
                 else:
                     print("Warning: '{}': '{}' exists, may will be overrided".format(key, value))
+
+# TODO: Check model and trainer config
