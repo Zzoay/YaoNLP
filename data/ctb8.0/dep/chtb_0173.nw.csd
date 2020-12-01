@@ -1,0 +1,74 @@
+1	乍得	_	NR	NR	_	3	nn	_	_
+2	新	_	JJ	JJ	_	3	amod	_	_
+3	领导人	_	NN	NN	_	4	nn	_	_
+4	代比	_	NR	NR	_	5	nsubj	_	_
+5	访	_	VV	VV	_	0	root	_	_
+6	法	_	NR	NR	_	5	dobj	_	_
+
+1	乍得	_	NR	NR	_	3	nn	_	_
+2	新	_	JJ	JJ	_	3	amod	_	_
+3	总统	_	NN	NN	_	4	nn	_	_
+4	依迪斯·代比	_	NR	NR	_	6	nsubj	_	_
+5	十二日	_	NT	NT	_	6	tmod	_	_
+6	到达	_	VV	VV	_	0	root	_	_
+7	巴黎	_	NR	NR	_	6	dobj	_	_
+8	访问	_	VV	VV	_	6	conj	_	_
+9	。	_	PU	PU	_	6	punct	_	_
+
+1	密特朗	_	NR	NR	_	2	nn	_	_
+2	总统	_	NN	NN	_	5	nsubj	_	_
+3	同	_	P	P	_	4	case	_	_
+4	他	_	PN	PN	_	5	prep	_	_
+5	进行	_	VV	VV	_	0	root	_	_
+6	了	_	AS	AS	_	5	asp	_	_
+7	半	_	CD	CD	_	8	nummod	_	_
+8	小时	_	NN	NN	_	10	nn	_	_
+9	秘密	_	JJ	JJ	_	10	amod	_	_
+10	会谈	_	NN	NN	_	5	dobj	_	_
+11	。	_	PU	PU	_	5	punct	_	_
+
+1	代比	_	NR	NR	_	2	nsubj	_	_
+2	希望	_	VV	VV	_	0	root	_	_
+3	法国	_	NR	NR	_	4	nsubj	_	_
+4	给予	_	VV	VV	_	2	ccomp	_	_
+5	乍得	_	NR	NR	_	4	dobj	_	_
+6	『	_	PU	PU	_	8	punct	_	_
+7	全面	_	JJ	JJ	_	8	amod	_	_
+8	支持	_	NN	NN	_	4	dobj	_	_
+9	』	_	PU	PU	_	8	punct	_	_
+10	法国	_	NR	NR	_	19	nsubj	_	_
+11	在	_	P	P	_	17	case	_	_
+12	表示	_	VV	VV	_	17	relcl	_	_
+13	愿	_	VV	VV	_	14	mmod	_	_
+14	提供	_	VV	VV	_	12	ccomp	_	_
+15	合作	_	NN	NN	_	14	dobj	_	_
+16	的	_	DEC	DEC	_	12	mark	_	_
+17	同时	_	NN	NN	_	19	prep	_	_
+18	，	_	PU	PU	_	19	punct	_	_
+19	表示	_	VV	VV	_	2	conj	_	_
+20	将	_	AD	AD	_	21	advmod	_	_
+21	中止	_	VV	VV	_	19	ccomp	_	_
+22	同	_	P	P	_	23	case	_	_
+23	乍得	_	NR	NR	_	26	assmod	_	_
+24	的	_	DEG	DEG	_	23	case	_	_
+25	军事	_	JJ	JJ	_	26	amod	_	_
+26	协议	_	NN	NN	_	21	dobj	_	_
+27	。	_	PU	PU	_	2	punct	_	_
+
+1	目前	_	NT	NT	_	5	tmod	_	_
+2	法国	_	NR	NR	_	5	nsubj	_	_
+3	在	_	P	P	_	4	case	_	_
+4	乍得	_	NR	NR	_	5	prep	_	_
+5	有	_	VE	VE	_	0	root	_	_
+6	一千二百	_	CD	CD	_	7	nummod	_	_
+7	人	_	NN	NN	_	9	assmod	_	_
+8	的	_	DEG	DEG	_	7	case	_	_
+9	驻军	_	NN	NN	_	5	dobj	_	_
+10	。	_	PU	PU	_	5	punct	_	_
+
+1	（	_	PU	PU	_	4	punct	_	_
+2	本	_	DT	DT	_	3	det	_	_
+3	报	_	NN	NN	_	4	nn	_	_
+4	专电	_	NN	NN	_	0	root	_	_
+5	）	_	PU	PU	_	4	punct	_	_
+

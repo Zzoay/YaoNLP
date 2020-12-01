@@ -1,7 +1,6 @@
 
 from collections import namedtuple
 from typing import NamedTuple
-# import foo
 
 import torch
 from torch.utils.data import DataLoader

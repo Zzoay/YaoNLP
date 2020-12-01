@@ -1,0 +1,46 @@
+1	自	_	P	P	_	5	case	_	_
+2	１９８８年	_	NT	NT	_	5	tmod	_	_
+3	赣南	_	NR	NR	_	4	nn	_	_
+4	老区	_	NN	NN	_	5	nsubj	_	_
+5	创办	_	VV	VV	_	22	prep	_	_
+6	经济	_	NN	NN	_	9	nn	_	_
+7	体制	_	NN	NN	_	9	nn	_	_
+8	改革	_	NN	NN	_	9	nn	_	_
+9	试验区	_	NN	NN	_	5	dobj	_	_
+10	以来	_	LC	LC	_	5	case	_	_
+11	，	_	PU	PU	_	22	punct	_	_
+12	江西	_	NR	NR	_	13	nn	_	_
+13	赣州市	_	NR	NR	_	21	nn	_	_
+14	交通	_	NN	NN	_	18	conj	_	_
+15	、	_	PU	PU	_	18	punct	_	_
+16	能源	_	NN	NN	_	18	conj	_	_
+17	、	_	PU	PU	_	18	punct	_	_
+18	通讯	_	NN	NN	_	21	nn	_	_
+19	等	_	ETC	ETC	_	18	etc	_	_
+20	基础	_	NN	NN	_	21	nn	_	_
+21	设施	_	NN	NN	_	22	nsubj	_	_
+22	得到	_	VV	VV	_	0	root	_	_
+23	很大	_	JJ	JJ	_	24	amod	_	_
+24	改善	_	NN	NN	_	22	dobj	_	_
+25	，	_	PU	PU	_	22	punct	_	_
+26	为	_	P	P	_	27	case	_	_
+27	发展	_	VV	VV	_	30	prep	_	_
+28	外向型	_	JJ	JJ	_	29	amod	_	_
+29	经济	_	NN	NN	_	27	dobj	_	_
+30	创造	_	VV	VV	_	22	conj	_	_
+31	了	_	AS	AS	_	30	asp	_	_
+32	条件	_	NN	NN	_	30	dobj	_	_
+33	。	_	PU	PU	_	22	punct	_	_
+
+1	图	_	NN	NN	_	5	nsubj	_	_
+2	为	_	VC	VC	_	5	cop	_	_
+3	赣州市	_	NR	NR	_	5	nn	_	_
+4	新区	_	NN	NN	_	5	nn	_	_
+5	面貌	_	NN	NN	_	0	root	_	_
+6	。	_	PU	PU	_	5	punct	_	_
+
+1	新华社	_	NR	NR	_	4	dep	_	_
+2	记者	_	NN	NN	_	4	dep	_	_
+3	刘继伍	_	NR	NR	_	4	dep	_	_
+4	摄	_	VV	VV	_	0	root	_	_
+

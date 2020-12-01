@@ -1,0 +1,26 @@
+1	南斯拉夫	_	NR	NR	_	2	nn	_	_
+2	联盟	_	NN	NN	_	3	nn	_	_
+3	总统	_	NN	NN	_	4	nn	_	_
+4	科什图尼察	_	NR	NR	_	6	nsubj	_	_
+5	日前	_	NT	NT	_	6	tmod	_	_
+6	强调	_	VV	VV	_	0	root	_	_
+7	，	_	PU	PU	_	6	punct	_	_
+8	他	_	PN	PN	_	10	nsubj	_	_
+9	不	_	AD	AD	_	10	neg	_	_
+10	打算	_	VV	VV	_	6	ccomp	_	_
+11	奉行	_	VV	VV	_	10	ccomp	_	_
+12	亲美	_	JJ	JJ	_	13	amod	_	_
+13	政策	_	NN	NN	_	11	dobj	_	_
+14	，	_	PU	PU	_	6	punct	_	_
+15	同时	_	AD	AD	_	16	advmod	_	_
+16	重申	_	VV	VV	_	6	conj	_	_
+17	他	_	PN	PN	_	22	nsubj	_	_
+18	将	_	AD	AD	_	22	advmod	_	_
+19	继续	_	VV	VV	_	22	mmod	_	_
+20	与	_	P	P	_	21	case	_	_
+21	俄罗斯	_	NR	NR	_	22	prep	_	_
+22	保持	_	VV	VV	_	16	ccomp	_	_
+23	良好	_	JJ	JJ	_	24	amod	_	_
+24	关系	_	NN	NN	_	22	dobj	_	_
+25	。	_	PU	PU	_	6	punct	_	_
+

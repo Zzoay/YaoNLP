@@ -1,0 +1,47 @@
+1	北京	_	NR	NR	_	2	nn	_	_
+2	军区	_	NN	NN	_	6	nn	_	_
+3	某	_	DT	DT	_	4	det	_	_
+4	部	_	NN	NN	_	6	nn	_	_
+5	“	_	PU	PU	_	6	punct	_	_
+6	钢八连	_	NR	NR	_	9	nsubj	_	_
+7	”	_	PU	PU	_	6	punct	_	_
+8	积极	_	AD	AD	_	9	advmod	_	_
+9	组织	_	VV	VV	_	0	root	_	_
+10	新	_	JJ	JJ	_	11	amod	_	_
+11	战士	_	NN	NN	_	9	dobj	_	_
+12	开展	_	VV	VV	_	9	dep	_	_
+13	丰富	_	VA	VA	_	18	relcl	_	_
+14	多采	_	VA	VA	_	13	comod	_	_
+15	的	_	DEC	DEC	_	13	mark	_	_
+16	文化	_	NN	NN	_	18	nn	_	_
+17	娱乐	_	NN	NN	_	18	nn	_	_
+18	活动	_	NN	NN	_	12	dobj	_	_
+19	，	_	PU	PU	_	9	punct	_	_
+20	使	_	VV	VV	_	9	dep	_	_
+21	战士们	_	NN	NN	_	20	dobj	_	_
+22	感受	_	VV	VV	_	20	dep	_	_
+23	到	_	VV	VV	_	22	rcomp	_	_
+24	了	_	AS	AS	_	22	asp	_	_
+25	军营	_	NN	NN	_	27	assmod	_	_
+26	的	_	DEG	DEG	_	25	case	_	_
+27	温暖	_	NN	NN	_	22	dobj	_	_
+28	。	_	PU	PU	_	9	punct	_	_
+
+1	图	_	NN	NN	_	10	nsubj	_	_
+2	为	_	VC	VC	_	10	cop	_	_
+3	连长	_	NN	NN	_	4	nn	_	_
+4	谭刚伦	_	NR	NR	_	10	nsubj	_	_
+5	正在	_	AD	AD	_	10	advmod	_	_
+6	和	_	P	P	_	8	case	_	_
+7	新	_	JJ	JJ	_	8	amod	_	_
+8	战士	_	NN	NN	_	10	prep	_	_
+9	一起	_	AD	AD	_	10	advmod	_	_
+10	举行	_	VV	VV	_	0	root	_	_
+11	娱乐	_	NN	NN	_	12	nn	_	_
+12	活动	_	NN	NN	_	10	dobj	_	_
+13	。	_	PU	PU	_	10	punct	_	_
+
+1	刘卫东	_	NR	NR	_	3	dep	_	_
+2	侯国忠	_	NR	NR	_	3	dep	_	_
+3	摄	_	VV	VV	_	0	root	_	_
+

@@ -1,0 +1,12 @@
+{
+    "word_embed_dim": 200,
+    "tag_embed_dim": 100,
+
+    "lstm_hiddens": 200,
+    "lstm_dropout": 0.0,
+
+    "mlp_arc_size": 200,
+    "mlp_rec_size": 100,
+
+    "dropout": 0.5
+}

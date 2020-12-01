@@ -1,7 +1,7 @@
 
 import json
 from types import SimpleNamespace
-from typing import NamedTuple, Tuple, Any
+from typing import NamedTuple, Tuple, Any, Union, Optional
 from collections import namedtuple
 
 from yaonlp import checker
@@ -30,12 +30,17 @@ def _dct_to_nametuple(dct: dict) -> Config:
     return config_ntpl
 
 
-def load_config(config_file: str) -> Config: 
+# TODO: Think about more efficient way to load config
+def load_config(config_file: str, mode: str = "namedtuple"): 
     # config = _dct_to_namespace(_load_json(config_path))
     config_dct = _load_json(config_file)
     
     # check path and filedir
     checker.check_dirConfig(config_dct)
 
-    config = _dct_to_nametuple(config_dct)
-    return config
+    if mode == "name_tuple":
+        return _dct_to_nametuple(config_dct)
+    elif mode == "dict":
+        return config_dct
+    
+    assert False, "mode not found."

@@ -1,0 +1,15 @@
+
+{
+    "data_path": "data/ctb8.0/dep/",
+    "vocab_path": "data/ctb8.0/vocab",
+
+    "word_vocab_file": "data/ctb8.0/vocab/word_vocab.txt",
+    "tag_vocab_file": "data/ctb8.0/vocab/tag_vocab.txt",
+    "head_vocab_file": "data/ctb8.0/vocab/head_vocab.txt",
+    "rel_vocab_file": "data/ctb8.0/vocab/rel_vocab.txt",
+
+    "min_freq": 2,
+
+    "shuffle": "True",
+    "batch_size": 64
+}
