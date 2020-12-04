@@ -6,16 +6,16 @@ from torch.nn import functional as F
 from yaonlp.layers import NonLinear, Biaffine, BiLSTM
 
 
+# Biaffine: https://arxiv.org/abs/1611.01734s
 class DependencyParser(nn.Module):
     def __init__(self, vocab_size, tag_size, rel_size, config):
         super(DependencyParser, self).__init__()
-        # vocab_size:int = 0
-        word_embed_dim:int = config["word_embed_dim"]
 
-        # tag_size:int = 0
+        word_embed_dim:int = config["word_embed_dim"]
         tag_embed_dim:int = config["tag_embed_dim"]
 
         lstm_hiddens:int = config["lstm_hiddens"]
+        lstm_num_layers:int = config["lstm_num_layers"]
 
         mlp_arc_size:int = config["mlp_arc_size"]
         mlp_rel_size:int = config["mlp_rel_size"]
@@ -27,6 +27,7 @@ class DependencyParser(nn.Module):
 
         self.bilstm = BiLSTM(input_size=word_embed_dim+tag_embed_dim, 
                              hidden_size=lstm_hiddens, 
+                             num_layers=lstm_num_layers,
                              batch_first=True, 
                              dropout=0)
 

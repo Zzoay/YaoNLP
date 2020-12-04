@@ -25,7 +25,8 @@ class BiLSTM(nn.Module):
                  dropout: float = 0) -> None: 
         super(BiLSTM, self).__init__()
         self.lstm = nn.LSTM(input_size=input_size, 
-                            hidden_size=hidden_size, 
+                            hidden_size=hidden_size,
+                            num_layers=num_layers, 
                             batch_first=True, 
                             bidirectional=True, 
                             dropout=dropout)
