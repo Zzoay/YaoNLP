@@ -15,7 +15,6 @@ from dependency import Dependency
 
 class CTBDataset(Dataset):
     def __init__(self, vocab, config: dict):
-        # data
         self.words, self.tags, self.heads, self.rels, self.masks, self.seq_lens = self.read_data(vocab, config["data_path"])
 
     def read_data(self, 
@@ -60,8 +59,6 @@ class CTBDataset(Dataset):
             r_tk_lst.append(torch.tensor(rel_tokens))
             m_tk_lst.append(torch.tensor(mask_tokens))
 
-        # return torch.tensor(w_tk_lst), torch.tensor(t_tk_lst), torch.tensor(h_tk_lst), \
-            #    torch.tensor(r_tk_lst), torch.tensor(m_tk_lst), torch.tensor(seq_len_lst)
         return w_tk_lst, t_tk_lst, h_tk_lst, r_tk_lst, m_tk_lst, seq_len_lst
     
     def __getitem__(self, idx):
@@ -79,7 +76,6 @@ def load_ctb(data_path: str):
     sentence:List[Dependency] = []
 
     for ctb_file in ctb_files:
-        # print(ctb_file)
         with open(ctb_file, 'r', encoding='utf-8') as f:
             # data example: 1	上海	_	NR	NR	_	2	nn	_	_
             for line in f.readlines():
