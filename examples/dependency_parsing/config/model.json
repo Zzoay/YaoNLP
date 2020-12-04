@@ -1,12 +1,11 @@
 {
-    "word_embed_dim": 200,
+    "word_embed_dim": 100,
     "tag_embed_dim": 100,
 
-    "lstm_hiddens": 200,
-    "lstm_dropout": 0.0,
+    "lstm_hiddens": 100,
 
-    "mlp_arc_size": 200,
-    "mlp_rec_size": 100,
+    "mlp_arc_size": 100,
+    "mlp_rel_size": 100,
 
-    "dropout": 0.5
+    "dropout": 0.33
 }

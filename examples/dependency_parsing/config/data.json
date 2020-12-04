@@ -8,6 +8,8 @@
     "head_vocab_file": "data/ctb8.0/vocab/head_vocab.txt",
     "rel_vocab_file": "data/ctb8.0/vocab/rel_vocab.txt",
 
+    "encoding": "utf-8",
+
     "min_freq": 2,
 
     "shuffle": "True",

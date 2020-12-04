@@ -1,3 +1,16 @@
 {
+    "seed": 1314,
+    "cuda": true,
+    "epochs": 10,
     
+    "optimizer": {
+        "type": "Adam",
+        "parameters": {
+            "lr": 0.001
+          }
+    },
+
+    "update_every": 4,
+    "print_every": 100,
+    "clip": 5
 }
