@@ -1,7 +1,4 @@
 
-import sys
-sys.path.append("C:\\Users\\Admin\\Desktop\\YaoNLP")
-
 from data_helper import CTBDataset
 from trainer import Trainer
 from vocab import Vocab

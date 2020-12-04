@@ -1,7 +1,4 @@
 
-import sys
-sys.path.append("C:\\Users\\Admin\\Desktop\\YaoNLP")
-
 import torch
 from torch.utils.data import DataLoader
 
