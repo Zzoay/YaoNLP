@@ -49,8 +49,6 @@ class DependencyParser(nn.Module):
         self.dropout = nn.Dropout(dropout)
         
     def forward(self, words, tags, heads, seq_lens):  # x: batch_size, seq_len
-        max_len = seq_lens[0]  # sorted already
-
         embed_word = self.word_emb(words)   # batch_size, seq_len, embed_dim
         embed_tag = self.tag_emb(tags) # batch_size, seq_len, embed_dim
 
@@ -81,6 +79,6 @@ class DependencyParser(nn.Module):
         rel_logit_cond = self.rel_biaffine(rel_dep, rel_head)  # batch_size, seq_len, seq_len, rel_nums
 
         # expand: -1 means not changing the size of that dimension
-        index = heads[:, :max_len].unsqueeze(2).unsqueeze(3).expand(-1, -1, -1, rel_logit_cond.shape[-1]) 
+        index = heads.unsqueeze(2).unsqueeze(3).expand(-1, -1, -1, rel_logit_cond.shape[-1]) 
         rel_logit = torch.gather(rel_logit_cond, dim=2, index=index).squeeze(2)
         return arc_logit, rel_logit

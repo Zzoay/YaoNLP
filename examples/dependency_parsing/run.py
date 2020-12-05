@@ -1,12 +1,15 @@
 
+import sys
+sys.path.append(r"C:\Users\Admin\Desktop\YaoNLP")
+
 from data_helper import CTBDataset
-from trainer import Trainer
+from trainer import MyTrainer
 from vocab import Vocab
 from model import DependencyParser
+from functional import compute_loss, compute_metrics
 
 from yaonlp.config_loader import load_config
 from yaonlp.data_helper import MyDataLoader, SortPadCollator
-from yaonlp.optim import OptimChooser
 from yaonlp.utils import set_seed
 
 
@@ -27,13 +30,9 @@ if __name__ == "__main__":
     data_iter = MyDataLoader(dataset, data_config, collate_fn=sp_collator)
 
     model  = DependencyParser(vocab_size=vocab.word_size, tag_size=vocab.tag_size, rel_size=vocab.rel_size, config=model_config)
+    
+    trainer = MyTrainer(loss_fn=compute_loss, metrics_fn=compute_metrics,config=trainer_config)
 
-    optim_chooser = OptimChooser(model.parameters(), 
-                                 optim_type=trainer_config["optimizer"]["type"], 
-                                 optim_params=trainer_config["optimizer"]["parameters"])
-    optim = optim_chooser.optim()
-
-    trainer = Trainer(trainer_config)
-    trainer.train(model=model, optim=optim, train_iter=data_iter)
+    trainer.train(model=model, train_iter=data_iter)
 
     print("finished.")

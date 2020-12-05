@@ -31,16 +31,16 @@ def _dct_to_nametuple(dct: dict) -> Config:
 
 
 # TODO: Think about more efficient way to load config
-def load_config(config_file: str, mode: str = "namedtuple"): 
+def load_config(config_file: str, mode: str = "dict"): 
     # config = _dct_to_namespace(_load_json(config_path))
     config_dct = _load_json(config_file)
     
     # check path and filedir
     checker.check_dirConfig(config_dct)
 
-    if mode == "name_tuple":
-        return _dct_to_nametuple(config_dct)
-    elif mode == "dict":
+    if mode == "dict":
         return config_dct
+    elif mode == "namedtuple":
+        return _dct_to_nametuple(config_dct)
     
     assert False, "mode not found."

@@ -5,7 +5,8 @@
     "optimizer": {
       "type": "Adam",
       "parameters": {
-        "lr": 0.001
-      }
+          "lr": 0.001
+        }
     }
+    
 }

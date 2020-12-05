@@ -1,15 +1,10 @@
 
 import os
-import sys
-sys.path.append("C:\\Users\\Admin\\Desktop\\YaoNLP")
-
 from typing import List, Union, Tuple, Any, Callable, Optional
 
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, Dataset
-
-from yaonlp.config_loader import Config
 from dependency import Dependency
 
 
