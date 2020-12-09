@@ -66,5 +66,124 @@ class Biaffine(nn.Module):
         biaffine = torch.transpose(torch.bmm(affine, input2), 1, 2)
 
         biaffine = biaffine.contiguous().view(batch_size, len2, len1, self.out_features)
-
         return biaffine
+
+
+class CRF(nn.Module):
+    def __init__(self, 
+                 tag_to_ix: dict, 
+                 START_TAG: str = "<START>", 
+                 END_TAG: str = "<END>") -> None:
+        super(CRF, self).__init__()
+        self.START_TAG = START_TAG
+        self.END_TAG = END_TAG
+
+        self.tag_to_ix = tag_to_ix
+        self.tagset_size = len(tag_to_ix)
+
+        # Matrix of transition parameters.  
+        # Entry i,j is the score of transitioning to i from j.
+        self.transitions = nn.Parameter(torch.randn(self.tagset_size, self.tagset_size))
+
+        # These two statements enforce the constraint that we never transfer
+        # to the start tag and we never transfer from the stop tag
+        self.transitions.data[tag_to_ix[START_TAG], :] = -10000
+        self.transitions.data[:, tag_to_ix[END_TAG]] = -10000
+
+    def _forward_alg(self, feats):
+        batch_size, seq_len, tagset_size = feats.shape
+        # Do the forward algorithm to compute the partition function
+        init_alphas = torch.full((batch_size, self.tagset_size), -10000.0)  # batch_size, tagset_size
+        # START_TAG has all of the score with log(1) = 0, while others're log(0) ~= -10000 (a small number)
+        init_alphas[:, self.tag_to_ix[self.START_TAG]] = 0.0
+
+        # Wrap in a variable so that we will get automatic backprop
+        forward_var = init_alphas
+
+        # # Iterate through the sentence
+        for i in range(seq_len):
+            feat = feats[:, i, :]   # batch_size, tagset_size
+            alphas_t = torch.stack([forward_var] * tagset_size).transpose(0, 1)
+            
+            # emitting score and transfering score
+            emit_score = feat.unsqueeze(1).transpose(1, 2)
+            trans_score = torch.unsqueeze(self.transitions, 0)
+
+            score = alphas_t + trans_score + emit_score
+
+            forward_var = torch.logsumexp(score, dim=2)
+        # add END_TAG   
+        terminal_var = forward_var + self.transitions[self.tag_to_ix[self.END_TAG]]
+        alpha = torch.logsumexp(terminal_var, dim=1)
+        return alpha
+
+    def _score_sentence(self, feats, tags):
+        batch_size, seq_len, tagset_size = feats.shape
+        # Gives the score of a provided tag sequence
+        score = torch.zeros(batch_size)
+        # concatenate START_TAG ix
+        start_tag_ix = torch.full((batch_size, 1), self.tag_to_ix[self.START_TAG], dtype=torch.long)
+        tags = torch.cat([start_tag_ix, tags], axis=1)
+
+        for i in range(seq_len):
+            feat = feats[:, i, :]
+            # Accumulate the transfer and emission score for each frame
+            emission_score = feat[range(batch_size), tags[:, i + 1]]
+            transfer_score = self.transitions[tags[:, i + 1], tags[:, i]].flatten()
+
+            score = score + transfer_score + emission_score
+        # add END_TAG 
+        score = score + self.transitions[self.tag_to_ix[self.END_TAG], tags[:,-1]]  
+        return score
+
+    def neg_log_likelihood(self, feats, tags):
+        forward_score = self._forward_alg(feats)
+        gold_score = self._score_sentence(feats, tags)
+        return torch.sum(forward_score - gold_score)
+    
+    def _viterbi_decode(self, feats):
+        batch_size, seq_len, tagset_size = feats.shape
+
+        # Initialize the viterbi variables in log space
+        init_alphas = torch.full((batch_size, self.tagset_size), -10000.)
+        init_alphas[:, self.tag_to_ix[self.START_TAG]] = 0.0
+
+        # forward_var at step i holds the viterbi variables for step i-1
+        forward_var = init_alphas
+
+        backpointers = []
+        for feat_index in range(seq_len):
+            feat = feats[:, feat_index, :]
+
+            alphas_t = torch.stack([forward_var] * tagset_size).transpose(0, 1)
+            trans_score = torch.unsqueeze(self.transitions, 0)
+            next_tag_var = alphas_t + trans_score
+
+            viterbivars_t, bptrs_t = torch.max(next_tag_var, dim=2)
+            forward_var = viterbivars_t + feat
+            backpointers.append(bptrs_t)
+
+        # add transition of END_TAG
+        terminal_var = forward_var + self.transitions[self.tag_to_ix[self.END_TAG]]
+    
+        path_score, best_tag_id = torch.max(terminal_var, dim=1)
+        best_tag_id = best_tag_id.tolist()
+
+        # Follow the back pointers to decode the best path.
+        best_path = [best_tag_id]
+        for bptrs_t in reversed(backpointers):
+            best_tag_id = bptrs_t[range(bptrs_t.shape[0]), best_tag_id].tolist()
+            best_path.append(best_tag_id)
+
+        # Pop off the start tag (we dont want to return that to the caller)
+        start = best_path.pop()
+        assert start[0] == self.tag_to_ix[self.START_TAG]  # Sanity check
+
+        best_path.reverse()
+        return path_score, torch.tensor(best_path).T
+    
+    # dont confuse this with _forward_alg above.
+    def forward(self, feats):  
+        # Find the best path, given the features.
+        score, tag_seq = self._viterbi_decode(feats)
+        return score, tag_seq
