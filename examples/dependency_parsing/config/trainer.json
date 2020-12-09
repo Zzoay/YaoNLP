@@ -1,7 +1,7 @@
 {
     "seed": 1314,
     "cuda": true,
-    "epochs": 10,
+    "epochs": 1,
     
     "optimizer": {
         "type": "Adam",
@@ -12,5 +12,6 @@
 
     "update_every": 4,
     "print_every": 100,
+    "eval_every": 500,
     "clip": 5
 }

@@ -4,7 +4,7 @@ from typing import Callable, Optional
 
 from torch.nn import Module
 
-from yaonlp.data_helper import MyDataLoader
+from yaonlp.data import MyDataLoader
 
 
 class Trainer():
@@ -24,4 +24,10 @@ class Trainer():
               model: Module,
               train_iter: MyDataLoader, 
               val_iter:Optional[MyDataLoader] = None) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def eval(self, 
+              model: Module,
+              val_iter: MyDataLoader) -> None:
         raise NotImplementedError

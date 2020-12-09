@@ -3,7 +3,7 @@ import torch
 import torch.nn.functional as F
 
 
-def compute_loss(arc_logits: torch.Tensor, 
+def arc_rel_loss(arc_logits: torch.Tensor, 
                  rel_logits: torch.Tensor, 
                  arc_gt: torch.Tensor,  # ground truth
                  rel_gt: torch.Tensor, 
@@ -21,11 +21,11 @@ def compute_loss(arc_logits: torch.Tensor,
     return arc_loss + rel_loss
 
 
-def compute_metrics(arc_logits: torch.Tensor,
-                    rel_logits: torch.Tensor,
-                    arc_gt: torch.Tensor,  # ground truth
-                    rel_gt: torch.Tensor,
-                    mask: torch.Tensor):
+def uas_las(arc_logits: torch.Tensor,
+            rel_logits: torch.Tensor,
+            arc_gt: torch.Tensor,  # ground truth
+            rel_gt: torch.Tensor,
+            mask: torch.Tensor) -> None:
     """
     CoNLL:
     LAS(labeled attachment score): the proportion of “scoring” tokens that are assigned both the correct head and the correct dependency relation label.

@@ -13,5 +13,7 @@
     "min_freq": 2,
 
     "shuffle": "True",
-    "batch_size": 64
+    "batch_size": 64,
+
+    "val_ratio": 0.3
 }

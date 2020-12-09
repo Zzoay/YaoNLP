@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from yaonlp.data_helper import MyDataLoader
+from yaonlp.data import MyDataLoader
 from yaonlp.optim import OptimChooser
 from yaonlp.trainer import Trainer
 

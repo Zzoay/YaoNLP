@@ -8,7 +8,7 @@ from trainer import MyTrainer
 from functional import cross_entropy, compute_acc
 
 from yaonlp.config_loader import load_config
-from yaonlp.data_helper import MyDataLoader, train_val_split
+from yaonlp.data import MyDataLoader, train_val_split
 
 
 if __name__ == "__main__":
