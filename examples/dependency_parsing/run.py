@@ -1,6 +1,6 @@
 
 import sys
-sys.path.append(r"C:\Users\Admin\Desktop\YaoNLP")
+sys.path.append(r"/home/jgy/YaoNLP/")
 
 from data_helper import CTBDataset
 from trainer import MyTrainer
