@@ -1,0 +1,45 @@
+1	与	_	P	P	_	2	case	_	_
+2	台湾	_	NR	NR	_	4	prep	_	_
+3	非正式	_	AD	AD	_	4	advmod	_	_
+4	接触	_	VV	VV	_	0	root	_	_
+
+1	香港	_	NR	NR	_	3	nn	_	_
+2	特别	_	JJ	JJ	_	3	amod	_	_
+3	行政区	_	NN	NN	_	7	nn	_	_
+4	行政	_	NN	NN	_	7	nn	_	_
+5	长官	_	NN	NN	_	7	nn	_	_
+6	办公室	_	NN	NN	_	7	nn	_	_
+7	发言人	_	NN	NN	_	16	nsubj	_	_
+8	今日	_	NT	NT	_	16	tmod	_	_
+9	（	_	PU	PU	_	10	punct	_	_
+10	星期四	_	NT	NT	_	8	prnmod	_	_
+11	）	_	PU	PU	_	10	punct	_	_
+12	回应	_	VV	VV	_	16	loc	_	_
+13	传媒	_	NN	NN	_	14	nn	_	_
+14	查询	_	NN	NN	_	12	dobj	_	_
+15	时	_	LC	LC	_	12	case	_	_
+16	表示	_	VV	VV	_	0	root	_	_
+17	，	_	PU	PU	_	16	punct	_	_
+18	叶国华	_	NR	NR	_	33	nsubj	_	_
+19	在	_	P	P	_	22	case	_	_
+20	过去	_	NT	NT	_	22	nn	_	_
+21	数	_	CD	CD	_	22	nummod	_	_
+22	星期	_	NN	NN	_	33	prep	_	_
+23	曾	_	AD	AD	_	33	advmod	_	_
+24	与	_	P	P	_	28	case	_	_
+25	中华	_	NR	NR	_	26	nn	_	_
+26	旅行社	_	NN	NN	_	28	assmod	_	_
+27	的	_	DEG	DEG	_	26	case	_	_
+28	郑安国	_	NR	NR	_	33	prep	_	_
+29	就	_	P	P	_	32	case	_	_
+30	港	_	NR	NR	_	31	nn	_	_
+31	台	_	NR	NR	_	32	nn	_	_
+32	事宜	_	NN	NN	_	33	prep	_	_
+33	作	_	VV	VV	_	16	ccomp	_	_
+34	非正式	_	JJ	JJ	_	36	assmod	_	_
+35	的	_	DEG	DEG	_	34	case	_	_
+36	接触	_	NN	NN	_	33	dobj	_	_
+37	。	_	PU	PU	_	16	punct	_	_
+
+1	完	_	VV	VV	_	0	root	_	_
+

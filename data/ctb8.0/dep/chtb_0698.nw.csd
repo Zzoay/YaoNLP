@@ -1,0 +1,89 @@
+1	日本	_	NR	NR	_	4	nn	_	_
+2	一	_	CD	CD	_	4	nummod	_	_
+3	新	_	JJ	JJ	_	4	amod	_	_
+4	党	_	NN	NN	_	5	nsubj	_	_
+5	成立	_	VV	VV	_	0	root	_	_
+
+1	新华社	_	NR	NR	_	5	dep	_	_
+2	东京	_	NR	NR	_	5	dep	_	_
+3	１２月	_	NT	NT	_	5	dep	_	_
+4	２８日	_	NT	NT	_	5	dep	_	_
+5	电	_	NN	NN	_	0	root	_	_
+
+1	日本	_	NR	NR	_	6	nn	_	_
+2	又	_	AD	AD	_	4	advmod	_	_
+3	一	_	CD	CD	_	4	nummod	_	_
+4	个	_	M	M	_	6	clf	_	_
+5	新	_	JJ	JJ	_	6	amod	_	_
+6	党派	_	NN	NN	_	9	nn	_	_
+7	“	_	PU	PU	_	9	punct	_	_
+8	参议院	_	NN	NN	_	9	nn	_	_
+9	俱乐部	_	NN	NN	_	12	nsubj	_	_
+10	”	_	PU	PU	_	9	punct	_	_
+11	２８日	_	NT	NT	_	12	tmod	_	_
+12	宣告	_	VV	VV	_	0	root	_	_
+13	成立	_	VV	VV	_	12	ccomp	_	_
+14	。	_	PU	PU	_	12	punct	_	_
+
+1	参加	_	VV	VV	_	8	dep	_	_
+2	“	_	PU	PU	_	4	punct	_	_
+3	参议院	_	NN	NN	_	4	nn	_	_
+4	俱乐部	_	NN	NN	_	6	nn	_	_
+5	”	_	PU	PU	_	4	punct	_	_
+6	党派	_	NN	NN	_	1	dobj	_	_
+7	的	_	DEC	DEC	_	1	mark	_	_
+8	有	_	VE	VE	_	0	root	_	_
+9	：	_	PU	PU	_	8	punct	_	_
+10	参议院	_	NN	NN	_	12	nn	_	_
+11	无党派	_	JJ	JJ	_	12	amod	_	_
+12	议员	_	NN	NN	_	21	nn	_	_
+13	椎名素夫	_	NR	NR	_	21	conj	_	_
+14	、	_	PU	PU	_	21	punct	_	_
+15	田名部匡省	_	NR	NR	_	21	conj	_	_
+16	、	_	PU	PU	_	21	punct	_	_
+17	松冈满寿男	_	NR	NR	_	21	conj	_	_
+18	、	_	PU	PU	_	21	punct	_	_
+19	堂本晓子	_	NR	NR	_	21	conj	_	_
+20	和	_	CC	CC	_	21	cc	_	_
+21	水野诚一	_	NR	NR	_	24	nn	_	_
+22	等	_	ETC	ETC	_	21	etc	_	_
+23	５	_	CD	CD	_	24	nummod	_	_
+24	人	_	NN	NN	_	8	dobj	_	_
+25	。	_	PU	PU	_	8	punct	_	_
+
+1	他们	_	PN	PN	_	11	nsubj	_	_
+2	原来	_	AD	AD	_	11	advmod	_	_
+3	都	_	AD	AD	_	11	advmod	_	_
+4	是	_	VC	VC	_	11	cop	_	_
+5	“	_	PU	PU	_	8	punct	_	_
+6	参议院	_	NN	NN	_	8	assmod	_	_
+7	之	_	DEG	DEG	_	6	case	_	_
+8	会	_	NN	NN	_	11	assmod	_	_
+9	”	_	PU	PU	_	8	punct	_	_
+10	的	_	DEG	DEG	_	8	case	_	_
+11	成员	_	NN	NN	_	0	root	_	_
+12	。	_	PU	PU	_	11	punct	_	_
+
+1	椎名素夫	_	NR	NR	_	2	nsubj	_	_
+2	就任	_	VV	VV	_	0	root	_	_
+3	该	_	DT	DT	_	4	det	_	_
+4	党	_	NN	NN	_	5	nn	_	_
+5	党代表	_	NN	NN	_	2	dobj	_	_
+6	。	_	PU	PU	_	2	punct	_	_
+
+1	该	_	DT	DT	_	2	det	_	_
+2	党	_	NN	NN	_	5	assmod	_	_
+3	的	_	DEG	DEG	_	2	case	_	_
+4	奋斗	_	NN	NN	_	5	nn	_	_
+5	目标	_	NN	NN	_	7	nsubj	_	_
+6	是	_	VC	VC	_	7	cop	_	_
+7	进行	_	VV	VV	_	0	root	_	_
+8	参议院	_	NN	NN	_	10	assmod	_	_
+9	的	_	DEG	DEG	_	8	case	_	_
+10	改革	_	NN	NN	_	7	dobj	_	_
+11	。	_	PU	PU	_	7	punct	_	_
+
+1	（	_	PU	PU	_	2	punct	_	_
+2	完	_	VV	VV	_	0	root	_	_
+3	）	_	PU	PU	_	2	punct	_	_
+

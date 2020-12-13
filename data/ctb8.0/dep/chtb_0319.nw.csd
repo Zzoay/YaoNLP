@@ -1,0 +1,42 @@
+1	改稿	_	NN	NN	_	3	dep	_	_
+2	（	_	PU	PU	_	3	punct	_	_
+3	一	_	CD	CD	_	0	root	_	_
+4	）	_	PU	PU	_	3	punct	_	_
+5	Ｙ	_	FW	FW	_	3	dep	_	_
+
+1	今	_	NT	NT	_	2	tmod	_	_
+2	播	_	VV	VV	_	13	relcl	_	_
+3	“	_	PU	PU	_	7	punct	_	_
+4	蒙古	_	NR	NR	_	6	nn	_	_
+5	残疾人	_	NN	NN	_	6	dep	_	_
+6	运动员	_	NN	NN	_	7	nsubj	_	_
+7	备战	_	VV	VV	_	13	nfincl	_	_
+8	‘	_	PU	PU	_	11	punct	_	_
+9	远南	_	NR	NR	_	11	dep	_	_
+10	’	_	PU	PU	_	11	punct	_	_
+11	运动会	_	NN	NN	_	7	dobj	_	_
+12	”	_	PU	PU	_	7	punct	_	_
+13	稿	_	NN	NN	_	16	dep	_	_
+14	，	_	PU	PU	_	16	punct	_	_
+15	三	_	CD	CD	_	16	nummod	_	_
+16	段	_	M	M	_	22	dep	_	_
+17	末	_	LC	LC	_	16	case	_	_
+18	“	_	PU	PU	_	22	punct	_	_
+19	体育	_	NN	NN	_	21	nn	_	_
+20	协会	_	NN	NN	_	21	nn	_	_
+21	会长	_	NN	NN	_	22	nn	_	_
+22	拉哈格瓦苏	_	NR	NR	_	24	nsubj	_	_
+23	”	_	PU	PU	_	22	punct	_	_
+24	改为	_	VV	VV	_	0	root	_	_
+25	“	_	PU	PU	_	29	punct	_	_
+26	体育	_	NN	NN	_	28	nn	_	_
+27	协会	_	NN	NN	_	28	nn	_	_
+28	会长	_	NN	NN	_	29	nn	_	_
+29	拉哈格瓦苏伦	_	NR	NR	_	24	dobj	_	_
+30	”	_	PU	PU	_	29	punct	_	_
+31	。	_	PU	PU	_	24	punct	_	_
+
+1	新华社	_	NR	NR	_	3	dep	_	_
+2	８月	_	NT	NT	_	3	dep	_	_
+3	３１日	_	NT	NT	_	0	root	_	_
+

@@ -1,0 +1,41 @@
+1	辽宁省	_	NR	NR	_	3	nn	_	_
+2	绥中县	_	NR	NR	_	3	nn	_	_
+3	地毯厂	_	NN	NN	_	4	nn	_	_
+4	产品	_	NN	NN	_	5	nsubj	_	_
+5	畅销	_	VV	VV	_	0	root	_	_
+6	美国	_	NR	NR	_	10	conj	_	_
+7	、	_	PU	PU	_	10	punct	_	_
+8	日本	_	NR	NR	_	10	conj	_	_
+9	、	_	PU	PU	_	10	punct	_	_
+10	比利时	_	NR	NR	_	14	nn	_	_
+11	等	_	ETC	ETC	_	10	etc	_	_
+12	国家	_	NN	NN	_	14	conj	_	_
+13	和	_	CC	CC	_	14	cc	_	_
+14	地区	_	NN	NN	_	5	dobj	_	_
+15	，	_	PU	PU	_	5	punct	_	_
+16	供不应求	_	VV	VV	_	5	conj	_	_
+17	。	_	PU	PU	_	5	punct	_	_
+
+1	该	_	DT	DT	_	2	det	_	_
+2	厂	_	NN	NN	_	3	nsubj	_	_
+3	织出	_	VV	VV	_	6	relcl	_	_
+4	的	_	DEC	DEC	_	3	mark	_	_
+5	天然色	_	NN	NN	_	6	nn	_	_
+6	地毯	_	NN	NN	_	9	nsubj	_	_
+7	，	_	PU	PU	_	9	punct	_	_
+8	去年	_	NT	NT	_	9	tmod	_	_
+9	获	_	VV	VV	_	0	root	_	_
+10	辽宁省	_	NR	NR	_	15	nn	_	_
+11	“	_	PU	PU	_	12	punct	_	_
+12	天马	_	NR	NR	_	15	nn	_	_
+13	”	_	PU	PU	_	12	punct	_	_
+14	优质	_	JJ	JJ	_	15	amod	_	_
+15	奖	_	NN	NN	_	9	dobj	_	_
+16	。	_	PU	PU	_	9	punct	_	_
+
+1	本	_	DT	DT	_	5	dep	_	_
+2	报	_	NN	NN	_	5	dep	_	_
+3	记者	_	NN	NN	_	5	dep	_	_
+4	张雅心	_	NR	NR	_	5	dep	_	_
+5	摄	_	VV	VV	_	0	root	_	_
+

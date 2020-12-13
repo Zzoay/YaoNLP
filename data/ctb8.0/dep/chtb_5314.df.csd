@@ -1,0 +1,182 @@
+1	打	_	VV	VV	_	5	loc	_	_
+2	伊拉克	_	NR	NR	_	1	dobj	_	_
+3	的	_	NOI	NOI	_	1	dep	_	_
+4	时	_	LC	LC	_	1	case	_	_
+5	说	_	VV	VV	_	0	root	_	_
+6	：	_	PU	PU	_	5	punct	_	_
+7	伊拉克	_	NR	NR	_	10	nsubj	_	_
+8	不	_	AD	AD	_	10	neg	_	_
+9	是	_	VC	VC	_	10	cop	_	_
+10	南斯拉夫	_	NR	NR	_	5	ccomp	_	_
+11	。	_	PU	PU	_	5	punct	_	_
+
+1	打	_	VV	VV	_	4	loc	_	_
+2	利比亚	_	NR	NR	_	1	dobj	_	_
+3	时	_	LC	LC	_	1	case	_	_
+4	说	_	VV	VV	_	0	root	_	_
+
+1	打	_	VV	VV	_	5	loc	_	_
+2	伊拉克	_	NR	NR	_	1	dobj	_	_
+3	的	_	NOI	NOI	_	1	dep	_	_
+4	时	_	LC	LC	_	1	case	_	_
+5	说	_	VV	VV	_	0	root	_	_
+6	：	_	PU	PU	_	5	punct	_	_
+7	伊拉克	_	NR	NR	_	10	nsubj	_	_
+8	不	_	AD	AD	_	10	neg	_	_
+9	是	_	VC	VC	_	10	cop	_	_
+10	南斯拉夫	_	NR	NR	_	5	ccomp	_	_
+11	。	_	PU	PU	_	5	punct	_	_
+
+1	打	_	VV	VV	_	4	loc	_	_
+2	利比亚	_	NR	NR	_	1	dobj	_	_
+3	时	_	LC	LC	_	1	case	_	_
+4	说	_	VV	VV	_	0	root	_	_
+5	：	_	PU	PU	_	4	punct	_	_
+6	利比亚	_	NR	NR	_	9	nsubj	_	_
+7	不	_	AD	AD	_	9	neg	_	_
+8	是	_	VC	VC	_	9	cop	_	_
+9	伊拉克	_	NR	NR	_	4	ccomp	_	_
+10	。	_	PU	PU	_	4	punct	_	_
+
+1	现在	_	NT	NT	_	8	dep	_	_
+2	又	_	AD	AD	_	8	advmod	_	_
+3	是	_	VC	VC	_	8	cop	_	_
+4	：	_	PU	PU	_	8	punct	_	_
+5	叙利亚	_	NR	NR	_	8	nsubj	_	_
+6	不	_	AD	AD	_	8	neg	_	_
+7	是	_	VC	VC	_	8	cop	_	_
+8	利比亚	_	NR	NR	_	0	root	_	_
+9	。	_	PU	PU	_	8	punct	_	_
+
+1	真	_	AD	AD	_	2	advmod	_	_
+2	让	_	VV	VV	_	0	root	_	_
+3	人	_	NN	NN	_	2	dobj	_	_
+4	无法	_	AD	AD	_	5	advmod	_	_
+5	理解	_	VV	VV	_	2	dep	_	_
+6	这些	_	DT	DT	_	7	det	_	_
+7	饭桶们	_	NN	NN	_	5	dobj	_	_
+8	。	_	PU	PU	_	2	punct	_	_
+
+1	只要	_	CS	CS	_	4	advmod	_	_
+2	人们	_	NN	NN	_	4	nsubj	_	_
+3	长期	_	AD	AD	_	4	advmod	_	_
+4	出现	_	VV	VV	_	13	dep	_	_
+5	动荡	_	NN	NN	_	4	dobj	_	_
+6	，	_	PU	PU	_	13	punct	_	_
+7	人们	_	NN	NN	_	8	nsubj	_	_
+8	推番	_	VV	VV	_	13	conj	_	_
+9	当正者	_	NN	NN	_	8	dobj	_	_
+10	是	_	VC	VC	_	13	cop	_	_
+11	迟早	_	JJ	JJ	_	13	assmod	_	_
+12	的	_	DEG	DEG	_	11	case	_	_
+13	事情	_	NN	NN	_	0	root	_	_
+14	。	_	PU	PU	_	13	punct	_	_
+
+1	除非	_	CS	CS	_	3	advmod	_	_
+2	一次性	_	AD	AD	_	3	advmod	_	_
+3	扼杀	_	VV	VV	_	0	root	_	_
+4	，	_	PU	PU	_	3	punct	_	_
+5	只要	_	CS	CS	_	6	advmod	_	_
+6	有	_	VE	VE	_	3	dep	_	_
+7	不断	_	VA	VA	_	9	relcl	_	_
+8	的	_	DEC	DEC	_	7	mark	_	_
+9	人们	_	NN	NN	_	10	nsubj	_	_
+10	出现	_	VV	VV	_	6	dep	_	_
+11	散步	_	VV	VV	_	10	comod	_	_
+12	，	_	PU	PU	_	3	punct	_	_
+13	改版	_	VV	VV	_	17	dep	_	_
+14	挣钱	_	NN	NN	_	15	nn	_	_
+15	结构	_	NN	NN	_	13	dobj	_	_
+16	是	_	VC	VC	_	17	cop	_	_
+17	毫无疑问	_	VV	VV	_	3	dep	_	_
+18	的	_	SP	SP	_	3	dep	_	_
+19	。	_	PU	PU	_	3	punct	_	_
+
+1	有	_	VE	VE	_	0	root	_	_
+2	人	_	NN	NN	_	3	nsubj	_	_
+3	说	_	VV	VV	_	1	dep	_	_
+4	过	_	AS	AS	_	3	asp	_	_
+5	利比亚	_	NR	NR	_	8	nsubj	_	_
+6	不	_	AD	AD	_	8	neg	_	_
+7	是	_	VC	VC	_	8	cop	_	_
+8	伊拉克	_	NR	NR	_	3	ccomp	_	_
+9	、	_	PU	PU	_	8	punct	_	_
+10	伊拉克	_	NR	NR	_	13	nsubj	_	_
+11	不	_	AD	AD	_	13	neg	_	_
+12	是	_	VC	VC	_	13	cop	_	_
+13	南斯拉夫	_	NR	NR	_	8	conj	_	_
+14	吗	_	SP	SP	_	1	dep	_	_
+
+1	你	_	PN	PN	_	5	nsubj	_	_
+2	也	_	AD	AD	_	5	advmod	_	_
+3	不	_	AD	AD	_	5	neg	_	_
+4	经常	_	AD	AD	_	5	advmod	_	_
+5	看	_	VV	VV	_	0	root	_	_
+6	样式台	_	NR	NR	_	5	dobj	_	_
+7	吧	_	SP	SP	_	5	dep	_	_
+8	？	_	PU	PU	_	5	punct	_	_
+
+1	以前	_	NT	NT	_	5	tmod	_	_
+2	恐怕	_	AD	AD	_	5	advmod	_	_
+3	很	_	AD	AD	_	5	advmod	_	_
+4	难	_	AD	AD	_	5	advmod	_	_
+5	找到	_	VV	VV	_	0	root	_	_
+6	。	_	PU	PU	_	5	punct	_	_
+
+1	要不	_	AD	AD	_	3	advmod	_	_
+2	你	_	PN	PN	_	3	nsubj	_	_
+3	看看	_	VV	VV	_	0	root	_	_
+4	有没有	_	VV	VV	_	5	mmod	_	_
+5	说	_	VV	VV	_	3	ccomp	_	_
+6	：	_	PU	PU	_	5	punct	_	_
+7	叙利亚	_	NR	NR	_	10	nsubj	_	_
+8	不	_	AD	AD	_	10	neg	_	_
+9	是	_	VC	VC	_	10	cop	_	_
+10	利比亚	_	NR	NR	_	5	ccomp	_	_
+11	。	_	PU	PU	_	3	punct	_	_
+
+1	保证	_	VV	VV	_	0	root	_	_
+2	很多	_	CD	CD	_	1	range	_	_
+
+1	偶	_	PN	PN	_	4	nsubj	_	_
+2	经常	_	AD	AD	_	4	advmod	_	_
+3	网上	_	NN	NN	_	4	dobj	_	_
+4	搜	_	VV	VV	_	0	root	_	_
+5	样式台	_	NR	NR	_	4	dobj	_	_
+6	关于	_	P	P	_	7	case	_	_
+7	这个	_	PN	PN	_	11	prep	_	_
+8	国际	_	NN	NN	_	9	nn	_	_
+9	方面	_	NN	NN	_	7	dep	_	_
+10	的	_	DEG	DEG	_	9	case	_	_
+11	体验	_	VV	VV	_	4	conj	_	_
+12	一下	_	AD	AD	_	11	advmod	_	_
+13	，	_	PU	PU	_	4	punct	_	_
+
+1	多	_	AD	AD	_	2	advmod	_	_
+2	看看	_	VV	VV	_	0	root	_	_
+3	样视	_	NR	NR	_	2	dobj	_	_
+4	，	_	PU	PU	_	2	punct	_	_
+5	怕	_	VV	VV	_	2	dep	_	_
+6	时间	_	NN	NN	_	7	nsubj	_	_
+7	长	_	VA	VA	_	9	dep	_	_
+8	了	_	AS	AS	_	7	asp	_	_
+9	忘记	_	VV	VV	_	5	ccomp	_	_
+10	，	_	PU	PU	_	2	punct	_	_
+11	准备	_	VV	VV	_	2	dep	_	_
+12	个	_	M	M	_	13	clf	_	_
+13	笔记本	_	NN	NN	_	11	dobj	_	_
+
+1	不	_	AD	AD	_	2	neg	_	_
+2	见	_	VV	VV	_	5	conj	_	_
+3	棺材	_	NN	NN	_	2	dobj	_	_
+4	不	_	AD	AD	_	5	neg	_	_
+5	掉	_	VV	VV	_	0	root	_	_
+6	泪	_	NN	NN	_	5	dobj	_	_
+
+1	不	_	AD	AD	_	2	neg	_	_
+2	见	_	VV	VV	_	5	conj	_	_
+3	棺材	_	NN	NN	_	2	dobj	_	_
+4	不	_	AD	AD	_	5	neg	_	_
+5	掉	_	VV	VV	_	0	root	_	_
+6	泪	_	NN	NN	_	5	dobj	_	_
+
