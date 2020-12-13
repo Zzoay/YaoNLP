@@ -1,6 +1,6 @@
 
 import sys
-sys.path.append(r"/home/jgy/YaoNLP/")
+sys.path.append(r".")   # add the YAONLP path
 
 from data_helper import CTBDataset
 from trainer import MyTrainer

@@ -1,6 +1,6 @@
 
 import sys
-sys.path.append(r"C:\Users\Admin\Desktop\YaoNLP")
+sys.path.append(r".")   # add the YAONLP path
 
 import torch
 import torch.nn as nn

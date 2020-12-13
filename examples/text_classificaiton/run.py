@@ -1,6 +1,6 @@
 
 import sys
-sys.path.append(r"C:\Users\Admin\Desktop\YaoNLP")
+sys.path.append(r".")   # add the YAONLP path
 
 from model import TextCNN
 from data_helper import MyDataset
