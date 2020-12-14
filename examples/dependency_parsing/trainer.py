@@ -78,7 +78,7 @@ class MyTrainer(Trainer):
                 words, tags, heads, rels, masks = to_cuda(data=(words, tags, heads, rels, masks))
 
             with torch.no_grad():
-                arc_logits, rel_logits = model(words, tags, heads, seq_lens)
+                arc_logits, rel_logits = model(words, tags, heads, seq_lens, eval=True)
 
             loss = self.loss_fn(arc_logits, rel_logits, heads, rels, masks)
             avg_loss += loss

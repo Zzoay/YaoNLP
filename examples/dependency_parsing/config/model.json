@@ -2,10 +2,10 @@
     "word_embed_dim": 100,
     "tag_embed_dim": 100,
 
-    "lstm_hiddens": 100,
-    "lstm_num_layers": 1,
+    "lstm_hiddens": 400,
+    "lstm_num_layers": 3,
 
-    "mlp_arc_size": 100,
+    "mlp_arc_size": 500,
     "mlp_rel_size": 100,
 
     "dropout": 0.33
