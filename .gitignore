@@ -136,3 +136,7 @@ dmypy.json
 
 # code counter
 .VSCodeCounter/
+
+# ignore data
+data/ctb8.0
+data/mr
