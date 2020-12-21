@@ -1,5 +1,5 @@
 
-from typing import Callable
+from typing import Callable, Optional
 
 import torch
 from torch import nn
@@ -7,13 +7,22 @@ from torch.nn import functional as F
 
  
 class NonLinear(nn.Module):
-    def __init__(self, in_features: int, out_features: int, activation: Callable): 
+    def __init__(self, 
+                 in_features: int, 
+                 out_features: int, 
+                 activation: Optional[Callable] = None, 
+                 initial: Optional[Callable] = None) -> None: 
         super(NonLinear, self).__init__()
         self._linear = nn.Linear(in_features, out_features)
         self._activation = activation
+
+        if initial:
+            initial(self._linear.weight)
     
     def forward(self, x):
-        return self._activation(self._linear(x))
+        if self._activation:
+            return self._activation(self._linear(x))
+        return self._linear(x)
 
 
 class BiLSTM(nn.Module):
@@ -30,13 +39,14 @@ class BiLSTM(nn.Module):
                             batch_first=True, 
                             bidirectional=True, 
                             dropout=dropout)
+        self.batch_first = batch_first
 
-    def forward(self, inputs: torch.Tensor, seq_lens: torch.Tensor, batch_first: bool = True):
-        seq_packed = torch.nn.utils.rnn.pack_padded_sequence(inputs, seq_lens, batch_first=batch_first)
+    def forward(self, inputs: torch.Tensor, seq_lens: torch.Tensor):
+        seq_packed = torch.nn.utils.rnn.pack_padded_sequence(inputs, seq_lens, batch_first=self.batch_first)
   
         lsmt_output, _ = self.lstm(seq_packed)   # lsmt_output: *, hidden_size * num_directions
         # seq_unpacked: batch_size, seq_max_len in batch, hidden_size * num_directions
-        seq_unpacked, _ = torch.nn.utils.rnn.pad_packed_sequence(lsmt_output, batch_first=batch_first)  
+        seq_unpacked, _ = torch.nn.utils.rnn.pad_packed_sequence(lsmt_output, batch_first=self.batch_first)  
         return seq_unpacked
     
 
@@ -54,7 +64,7 @@ class Biaffine(nn.Module):
         self.linear = nn.Linear(in_features=self.linear_in_features,
                                 out_features=self.linear_out_features)
 
-    def forward(self, input1, input2):
+    def forward(self, input1: torch.Tensor, input2: torch.Tensor):
         batch_size, len1, dim1 = input1.size()
         batch_size, len2, dim2 = input2.size()
 
