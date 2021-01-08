@@ -101,7 +101,7 @@ class CRF(nn.Module):
         self.transitions.data[:, tag_to_ix[END_TAG]] = -10000
 
     def _forward_alg(self, feats):
-        batch_size, seq_len, tagset_size = feats.shape
+        batch_size, seq_len, tagset_size = feats.size()
         # Do the forward algorithm to compute the partition function
         init_alphas = torch.full((batch_size, self.tagset_size), -10000.0)  # batch_size, tagset_size
         # START_TAG has all of the score with log(1) = 0, while others're log(0) ~= -10000 (a small number)
@@ -113,14 +113,15 @@ class CRF(nn.Module):
         # # Iterate through the sentence
         for i in range(seq_len):
             feat = feats[:, i, :]   # batch_size, tagset_size
-            alphas_t = torch.stack([forward_var] * tagset_size).transpose(0, 1)
-            
+            # alphas_t = torch.stack([forward_var] * tagset_size).transpose(0, 1).cuda()
+            forward_broadcast = forward_var.unsqueeze(2).transpose(1, 2) # batch_size, tagset_size, 1 
+
             # emitting score and transfering score
-            emit_score = feat.unsqueeze(1).transpose(1, 2)
-            trans_score = torch.unsqueeze(self.transitions, 0)
+            emit_score = feat.unsqueeze(1).transpose(1, 2)    # batch_size, 1, tagset_size
+            trans_score = self.transitions.unsqueeze(0)  # 1, batch_size, tagset_size
 
-            score = alphas_t + trans_score + emit_score
-
+            score = forward_broadcast + emit_score + trans_score  # batch_size, tagset_size, tagset_sizes
+            
             forward_var = torch.logsumexp(score, dim=2)
         # add END_TAG   
         terminal_var = forward_var + self.transitions[self.tag_to_ix[self.END_TAG]]
@@ -128,7 +129,7 @@ class CRF(nn.Module):
         return alpha
 
     def _score_sentence(self, feats, tags):
-        batch_size, seq_len, tagset_size = feats.shape
+        batch_size, seq_len, tagset_size = feats.size()
         # Gives the score of a provided tag sequence
         score = torch.zeros(batch_size)
         # concatenate START_TAG ix
@@ -152,7 +153,7 @@ class CRF(nn.Module):
         return torch.sum(forward_score - gold_score)
     
     def _viterbi_decode(self, feats):
-        batch_size, seq_len, tagset_size = feats.shape
+        batch_size, seq_len, tagset_size = feats.size()
 
         # Initialize the viterbi variables in log space
         init_alphas = torch.full((batch_size, self.tagset_size), -10000.)
@@ -166,7 +167,7 @@ class CRF(nn.Module):
             feat = feats[:, feat_index, :]
 
             alphas_t = torch.stack([forward_var] * tagset_size).transpose(0, 1)
-            trans_score = torch.unsqueeze(self.transitions, 0)
+            trans_score = self.transitions.unsqueeze(0)
             next_tag_var = alphas_t + trans_score
 
             viterbivars_t, bptrs_t = torch.max(next_tag_var, dim=2)

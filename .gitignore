@@ -140,3 +140,7 @@ dmypy.json
 # ignore data
 data/ctb8.0
 data/mr
+data/SDRN_DATA
+
+pretrained_model/bert
+pretrained_model/bert-base-uncased

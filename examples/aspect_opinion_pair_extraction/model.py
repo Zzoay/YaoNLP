@@ -2,20 +2,22 @@
 import torch
 from torch import nn
 from torch.nn import functional as F
-from transformers import BertModel
+import torch.nn.init as init
+from transformers import BertModel, BertConfig
 
 from yaonlp.layers import NonLinear, Biaffine, BiLSTM
+from yaonlp.encoder import BertReps
+from yaonlp.layers import CRF
 
 from relation_attention import RelationAttention
 
 
-class APOE(nn.Module):
-    def __init__(self, args, config, label_alphabet):
-        super(APOE, self).__init__()
+class AOPE(nn.Module):
+    def __init__(self, args):
+        super(AOPE, self).__init__()
         print("build network...")
         self.gpu = args.ifgpu
-        self.label_size = label_alphabet.size()
-        self.bert_encoder_dim = config.hidden_size
+        self.label_size = 5
         self.target_hidden_dim = args.target_hidden_dim
         self.relation_hidden_dim = args.relation_hidden_dim
         self.relation_threds = args.relation_threds
@@ -24,25 +26,37 @@ class APOE(nn.Module):
 
         self.hidden_mask, self.score_mask = self.check_trick(args.trick)
 
+        self.bert_config = BertConfig.from_json_file(args.bert_json_dir)
+        self.bert_encoder_dim = self.bert_config.hidden_size
         # encoder
-        self.bert = BertModel.from_pretrained('bert-base-uncased') # the bert model path, including pytorch.bin and config.json
+        self.bert = BertReps(args.bert_path) # the bert model path, including pytorch.bin and config.json
         
         self.target_mlp = NonLinear(in_features=self.bert_encoder_dim, 
                                     out_features=self.target_hidden_dim, 
-                                    activation=torch.tanh,
-                                    initial=init.xavier_uniform_)
+                                    activation=torch.tanh)
 
         self.rel_mlp = NonLinear(in_features=self.bert_encoder_dim, 
                                  out_features=self.relation_hidden_dim, 
-                                 activation=torch.tanh,
-                                 initial=init.xavier_uniform_)
+                                 activation=torch.tanh)
 
         self.hidden2tag = NonLinear(in_features=self.target_hidden_dim,
                                     out_features=self.label_size + 2,  # add <start> and <end> tag
-                                    activation=None,     
-                                    initial=init.xavier_uniform_)
+                                    activation=None)
         
         self.rel_att = RelationAttention(args)
+
+        self.crf = CRF(tag_to_ix={"<PAD>":0, "O":1, "B-T":2, "I-T":3,"B-P":4,"I-P":5, "<START>": 6, "<END>": 7})
+
+        self.dropout = nn.Dropout(self.drop)
+
+        # parameters initialization
+        self.initial()
+    
+    def initial(self):
+        init.xavier_uniform_(self.target_mlp._linear.weight)
+        init.xavier_uniform_(self.rel_mlp._linear.weight)
+        init.xavier_uniform_(self.hidden2tag._linear.weight)
+        # init.xavier_uniform_(self.rel_att)
 
     def check_trick(self, trick):
         if trick == "All":
@@ -63,7 +77,7 @@ class APOE(nn.Module):
         target_pred, r_pred, tag_seq = self.main_structure(maskMatrix, all_input_ids, all_segment_ids, self.step,
                                                           all_input_mask)
         # target Loss
-        target_loss = self.crf.neg_log_likelihood_loss(target_pred, all_input_mask.byte(), all_labels)
+        target_loss = self.crf.neg_log_likelihood_loss(target_pred, all_labels)  # TODO add Mask
         # scores, tag_seq = self.crf._viterbi_decode(target_pred, all_input_mask.byte())
         target_loss = target_loss / batch_size
 
@@ -78,7 +92,7 @@ class APOE(nn.Module):
         return target_loss, relation_loss, tag_seq, r_pred
 
     def forward(self, all_input_ids, all_segment_ids, all_input_mask):
-        batch_size, seq_len = all_input_ids.shape
+        batch_size, seq_len = all_input_ids.size()
         mask_tmp1 = all_input_mask.view(batch_size, 1, seq_len).repeat(1, seq_len, 1)
         mask_tmp2 = all_input_mask.view(batch_size, seq_len, 1).repeat(1, 1, seq_len)
         maskMatrix = mask_tmp1 * mask_tmp2
@@ -88,7 +102,7 @@ class APOE(nn.Module):
         return tag_seq, r_pred
 
     def main_structure(self, maskMatrix, all_input_ids, all_segment_ids, steps, all_input_mask):
-        batch_size, seq_len = all_input_ids.shape
+        batch_size, seq_len = all_input_ids.size()
         # bert
         all_outputs = self.bert(all_input_ids, all_segment_ids, all_input_mask)
         sequence_output = all_outputs.last_hidden_state
@@ -97,14 +111,11 @@ class APOE(nn.Module):
         target_hidden = self.target_mlp(sequence_output)
 
         target_pred = self.hidden2tag(target_hidden)
-        tag_score, tag_seq = self.crf._viterbi_decode(target_pred, all_input_mask.byte())
+        tag_score, tag_seq = self.crf._viterbi_decode(target_pred)  # TODO add mask
 
         # while useful tags (like 'B-T',...) start from 2 to 5
         # {"O":1, "B-T":2, "I-T":3,"B-P":4,"I-P":5}
         tag_mask = tag_seq.gt(1)
-
-        # use tag_score to calculate masks
-        # hidden_entity_score = tag_score.view(batch_size, seq_len, 1).repeat(1, 1, self.relation_hidden_dim)
 
         relation_hidden = self.rel_mlp(sequence_output)  # b,s,relation_hidden_dim
         if self.hidden_mask:

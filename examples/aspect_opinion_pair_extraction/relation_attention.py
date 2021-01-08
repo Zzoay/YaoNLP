@@ -24,16 +24,15 @@ class RelationAttention(nn.Module):
         self.softmax = nn.Softmax(dim=2)
 
     def forward(self, relation_hidden):
-        batchSize = relation_hidden.size(0)
-        seqLen = relation_hidden.size(1)
+        batch_size, seq_len, relation_hidden_dim = relation_hidden.size()
 
-        ta_result = F.linear(relation_hidden, self.w_ta, None).view(batchSize, seqLen, 1, self.relation_attention_dim).repeat(1, 1, seqLen,
+        ta_result = F.linear(relation_hidden, self.w_ta, None).view(batch_size, seq_len, 1, self.relation_attention_dim).repeat(1, 1, seq_len,
                                                                                                           1)
-        ja_result = F.linear(relation_hidden, self.w_ja, None).view(batchSize, 1, seqLen, self.relation_attention_dim).repeat(1, seqLen, 1,
+        ja_result = F.linear(relation_hidden, self.w_ja, None).view(batch_size, 1, seq_len, self.relation_attention_dim).repeat(1, seq_len, 1,
                                                                                                           1)
 
         attention_alpha = torch.tanh(ta_result + ja_result + self.b)  # b,s,s,h
         attention_alpha = F.linear(attention_alpha, self.v, None)  # b,s,s,1
 
-        attention_alpha = self.softmax(attention_alpha.view(batchSize, seqLen, seqLen))  # b,s,s
+        attention_alpha = self.softmax(attention_alpha.view(batch_size, seq_len, seq_len))  # b,s,s
         return attention_alpha

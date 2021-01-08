@@ -1,4 +1,6 @@
 
+from typing import Dict
+
 import torch
 import torch.nn.functional as F
 
@@ -25,7 +27,7 @@ def uas_las(arc_logits: torch.Tensor,
             rel_logits: torch.Tensor,
             arc_gt: torch.Tensor,  # ground truth
             rel_gt: torch.Tensor,
-            mask: torch.Tensor) -> None:
+            mask: torch.Tensor) -> Dict[str:float, str:float]:
     """
     CoNLL:
     LAS(labeled attachment score): the proportion of “scoring” tokens that are assigned both the correct head and the correct dependency relation label.
