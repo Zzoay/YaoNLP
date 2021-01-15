@@ -4,6 +4,7 @@ from typing import Callable, Optional
 import torch
 from torch import nn
 from torch.nn import functional as F
+from torch.nn import init
 
  
 class NonLinear(nn.Module):
@@ -81,70 +82,82 @@ class Biaffine(nn.Module):
 
 class CRF(nn.Module):
     def __init__(self, 
-                 tag_to_ix: dict, 
-                 START_TAG: str = "<START>", 
-                 END_TAG: str = "<END>") -> None:
+                 tag_size: int,
+                 init_func: Callable = init.normal_,
+                 to_cuda: bool = False) -> None:
         super(CRF, self).__init__()
-        self.START_TAG = START_TAG
-        self.END_TAG = END_TAG
+        self.tag_size = tag_size
+        self.START_IDX = tag_size - 2
+        self.END_IDX = tag_size - 1
 
-        self.tag_to_ix = tag_to_ix
-        self.tagset_size = len(tag_to_ix)
+        self.to_cuda = to_cuda
 
         # Matrix of transition parameters.  
         # Entry i,j is the score of transitioning to i from j.
-        self.transitions = nn.Parameter(torch.randn(self.tagset_size, self.tagset_size))
+        if to_cuda:
+           self.transitions = nn.Parameter(torch.empty(self.tag_size, self.tag_size)).cuda() 
+        else:
+            self.transitions = nn.Parameter(torch.empty(self.tag_size, self.tag_size))
+        self.reset_parameters(init_func=init_func)
 
+    def reset_parameters(self, init_func: Optional[Callable] = None) -> None:
+        if init_func:
+            init_func(self.transitions)
         # These two statements enforce the constraint that we never transfer
         # to the start tag and we never transfer from the stop tag
-        self.transitions.data[tag_to_ix[START_TAG], :] = -10000
-        self.transitions.data[:, tag_to_ix[END_TAG]] = -10000
+        self.transitions.data[self.START_IDX, :] = -10000
+        self.transitions.data[:, self.END_IDX] = -10000
 
-    def _forward_alg(self, feats):
-        batch_size, seq_len, tagset_size = feats.size()
+    def _forward_alg(self, feats: torch.Tensor):
+        batch_size, seq_len, tag_size = feats.size()
         # Do the forward algorithm to compute the partition function
-        init_alphas = torch.full((batch_size, self.tagset_size), -10000.0)  # batch_size, tagset_size
+        init_alphas = torch.full((batch_size, self.tag_size), -10000.0)  # batch_size, tag_size
         # START_TAG has all of the score with log(1) = 0, while others're log(0) ~= -10000 (a small number)
-        init_alphas[:, self.tag_to_ix[self.START_TAG]] = 0.0
+        init_alphas[:, self.START_IDX] = 0.0
 
         # Wrap in a variable so that we will get automatic backprop
         forward_var = init_alphas
+        if self.to_cuda:
+            forward_var = forward_var.cuda()
 
         # # Iterate through the sentence
         for i in range(seq_len):
-            feat = feats[:, i, :]   # batch_size, tagset_size
-            # alphas_t = torch.stack([forward_var] * tagset_size).transpose(0, 1).cuda()
-            forward_broadcast = forward_var.unsqueeze(2).transpose(1, 2) # batch_size, tagset_size, 1 
+            feat = feats[:, i, :]   # (batch_size, tag_size)
+            forward_broadcast = forward_var.unsqueeze(1)  # (batch_size, 1, tag_size) 
 
             # emitting score and transfering score
-            emit_score = feat.unsqueeze(1).transpose(1, 2)    # batch_size, 1, tagset_size
-            trans_score = self.transitions.unsqueeze(0)  # 1, batch_size, tagset_size
+            emit_score = feat.unsqueeze(2)   # (batch_size, tag_size, 1)
+            trans_score = self.transitions.unsqueeze(0)  # (1, tag_size, tag_size)
 
-            score = forward_broadcast + emit_score + trans_score  # batch_size, tagset_size, tagset_sizes
+            score = forward_broadcast + emit_score + trans_score  # (batch_size, tag_size, tag_sizes)
             
             forward_var = torch.logsumexp(score, dim=2)
         # add END_TAG   
-        terminal_var = forward_var + self.transitions[self.tag_to_ix[self.END_TAG]]
-        alpha = torch.logsumexp(terminal_var, dim=1)
+        terminal_var = forward_var + self.transitions[self.END_IDX]  # (batch_size, tag_size)
+        alpha = torch.logsumexp(terminal_var, dim=1)  # (batch_size, )
         return alpha
 
-    def _score_sentence(self, feats, tags):
-        batch_size, seq_len, tagset_size = feats.size()
+    def _score_sentence(self, feats: torch.Tensor, tags: torch.Tensor):
+        batch_size, seq_len, tag_size = feats.size()
         # Gives the score of a provided tag sequence
         score = torch.zeros(batch_size)
         # concatenate START_TAG ix
-        start_tag_ix = torch.full((batch_size, 1), self.tag_to_ix[self.START_TAG], dtype=torch.long)
-        tags = torch.cat([start_tag_ix, tags], axis=1)
+        start_tag_ix = torch.full((batch_size, 1), self.START_IDX, dtype=torch.long)
+        if self.to_cuda:
+            score = score.cuda()
+            start_tag_ix = start_tag_ix.cuda()
+
+        tags = torch.cat([start_tag_ix, tags], dim=1)  # (batch_size, seq_len + 1)
 
         for i in range(seq_len):
-            feat = feats[:, i, :]
-            # Accumulate the transfer and emission score for each frame
-            emission_score = feat[range(batch_size), tags[:, i + 1]]
-            transfer_score = self.transitions[tags[:, i + 1], tags[:, i]].flatten()
+            feat = feats[:, i, :]  # (batch_size, tag_size)
+            # Accumulate the transition and emission score for each frame
+            emission_score = feat[range(batch_size), tags[:, i + 1]]  # (batch_size, )
+            transfer_score = self.transitions[tags[:, i + 1], tags[:, i]].flatten()  # (batch_size, )
 
-            score = score + transfer_score + emission_score
+            score = score + transfer_score + emission_score  # (batch_size, )
         # add END_TAG 
-        score = score + self.transitions[self.tag_to_ix[self.END_TAG], tags[:,-1]]  
+        score = score + self.transitions[self.END_IDX, tags[:,-1]]   # (batch_size, )
         return score
 
     def neg_log_likelihood(self, feats, tags):
@@ -153,29 +166,33 @@ class CRF(nn.Module):
         return torch.sum(forward_score - gold_score)
     
     def _viterbi_decode(self, feats):
-        batch_size, seq_len, tagset_size = feats.size()
+        batch_size, seq_len, tag_size = feats.size()
 
         # Initialize the viterbi variables in log space
-        init_alphas = torch.full((batch_size, self.tagset_size), -10000.)
-        init_alphas[:, self.tag_to_ix[self.START_TAG]] = 0.0
+        init_alphas = torch.full((batch_size, self.tag_size), -10000.)
+        init_alphas[:, self.START_IDX] = 0.0
 
         # forward_var at step i holds the viterbi variables for step i-1
         forward_var = init_alphas
+        if self.to_cuda:
+            forward_var = forward_var.cuda()
 
         backpointers = []
         for feat_index in range(seq_len):
             feat = feats[:, feat_index, :]
 
-            alphas_t = torch.stack([forward_var] * tagset_size).transpose(0, 1)
-            trans_score = self.transitions.unsqueeze(0)
-            next_tag_var = alphas_t + trans_score
+            forward_broadcast = forward_var.unsqueeze(1)  # (batch_size, 1, tag_size)
+            trans_score = self.transitions.unsqueeze(0)  # (1, tag_size, tag_size)
 
-            viterbivars_t, bptrs_t = torch.max(next_tag_var, dim=2)
-            forward_var = viterbivars_t + feat
+            next_tag_var = forward_broadcast + trans_score  # (batch_size, tag_size, tag_size)
+
+            viterbivars_t, bptrs_t = torch.max(next_tag_var, dim=2)  # (batch_size, tag_size)
+
+            forward_var = viterbivars_t + feat  # (batch_size, tag_size)
             backpointers.append(bptrs_t)
 
         # add transition of END_TAG
-        terminal_var = forward_var + self.transitions[self.tag_to_ix[self.END_TAG]]
+        terminal_var = forward_var + self.transitions[self.END_IDX]
     
         path_score, best_tag_id = torch.max(terminal_var, dim=1)
         best_tag_id = best_tag_id.tolist()
@@ -188,12 +205,17 @@ class CRF(nn.Module):
 
         # Pop off the start tag (we dont want to return that to the caller)
         start = best_path.pop()
-        assert start[0] == self.tag_to_ix[self.START_TAG]  # Sanity check
+        assert start[0] == self.START_IDX  # Sanity check
 
         best_path.reverse()
-        return path_score, torch.tensor(best_path).T
+        # transpose to (batch_size, seq_len)
+        best_path = torch.tensor(best_path).T
+        if self.to_cuda:
+            best_path = best_path.cuda()
+
+        return path_score, best_path
     
-    # dont confuse this with _forward_alg above.
+    # don't confuse this with _forward_alg above.
     def forward(self, feats):  
         # Find the best path, given the features.
         score, tag_seq = self._viterbi_decode(feats)
