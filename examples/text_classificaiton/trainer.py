@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from yaonlp.data import MyDataLoader
+from yaonlp.data import DataLoader
 from yaonlp.optim import OptimChooser
 from yaonlp.trainer import Trainer
 
@@ -19,7 +19,7 @@ class MyTrainer(Trainer):
         self.optim_type = config["optimizer"]["type"]
         self.optim_params = config["optimizer"]["parameters"]
 
-    def train(self, model: nn.Module, train_iter: MyDataLoader, val_iter: MyDataLoader) -> None:
+    def train(self, model: nn.Module, train_iter: DataLoader, val_iter: DataLoader) -> None:
         model.train()
         if torch.cuda.is_available():
             model.cuda()
@@ -52,7 +52,7 @@ class MyTrainer(Trainer):
                 step += 1
 
     # eval func
-    def eval(self, model: nn.Module, test_iter: MyDataLoader) -> None:
+    def eval(self, model: nn.Module, test_iter: DataLoader) -> None:
         model.eval()
         corrects, avg_loss = 0, 0.0
         for batch in test_iter:
@@ -67,7 +67,7 @@ class MyTrainer(Trainer):
 
             corrects += (predicts.view(batch_y.size()).data == batch_y.data).sum()
         
-        size = test_iter.data_size
+        size = len(test_iter.dataset)
         avg_loss = avg_loss / size
         accuracy = 100.0 * corrects/size
         print("--Evaluation:")

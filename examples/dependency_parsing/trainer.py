@@ -7,7 +7,7 @@ import torch.nn as nn
 from yaonlp.utils import to_cuda 
 from yaonlp.optim import OptimChooser
 from yaonlp.trainer import Trainer
-from yaonlp.data import MyDataLoader
+from yaonlp.data import DataLoader
 
 
 class MyTrainer(Trainer):
@@ -22,8 +22,8 @@ class MyTrainer(Trainer):
 
     def train(self, 
               model: nn.Module, 
-              train_iter: MyDataLoader, 
-              val_iter: Optional[MyDataLoader] = None) -> None:
+              train_iter: DataLoader, 
+              val_iter: DataLoader) -> None:
         model.train()
         if self.config["cuda"] and torch.cuda.is_available():
             model.cuda()
@@ -67,7 +67,7 @@ class MyTrainer(Trainer):
         print("--training finished.")
 
     # eval func
-    def eval(self, model: nn.Module, eval_iter: MyDataLoader) -> None:
+    def eval(self, model: nn.Module, eval_iter: DataLoader) -> None:
         model.eval()
 
         avg_loss, avg_uas, avg_las, step = 0.0, 0.0, 0.0, 0
