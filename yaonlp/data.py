@@ -1,25 +1,26 @@
 
 import torch
 from torch.utils.data import DataLoader, Dataset, random_split
+from torch.utils.data._utils import collate
 import torch.nn.utils.rnn as rnn_utils
 
 import os
-from typing import List, Callable, Optional
+from typing import List, Callable, Optional, Any
 
 
-class MyDataLoader(DataLoader):
-    def __init__(self, dataset, config, collate_fn: Optional[Callable] = None) -> None:
-        super(MyDataLoader, self).__init__(
-            dataset, 
-            batch_size=config["batch_size"], 
-            shuffle=config["shuffle"],
-            collate_fn=collate_fn)
-        self.data_size = len(self.dataset)
+# class MyDataLoader(DataLoader):
+#     def __init__(self, dataset, config, collate_fn: Callable[[List[Any]], Any] = collate.default_collate) -> None:
+#         super(MyDataLoader, self).__init__(
+#             dataset, 
+#             batch_size=config["batch_size"], 
+#             shuffle=config["shuffle"],
+#             collate_fn=collate_fn)
+#         # self.data_size = len(self.dataset)
 
 
-def train_val_split(train_dataset: Dataset, config) -> List: # List[Subset] actually
+def train_val_split(train_dataset: Dataset, val_ratio: float) -> List: # List[Subset] actually
     size = len(train_dataset)
-    val_size = int(size * config["val_ratio"])
+    val_size = int(size * val_ratio)
     train_size = size - val_size
     return random_split(train_dataset, (train_size, val_size), None)
 

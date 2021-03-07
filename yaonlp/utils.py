@@ -1,12 +1,12 @@
 
-import numpy as np
+from numpy import random as np_random
 import torch
 import random
 
 
 def set_seed(seed):
     random.seed(seed)
-    np.random.seed(seed)
+    np_random.seed(seed)
     torch.cuda.manual_seed(seed)
     torch.manual_seed(seed)
 

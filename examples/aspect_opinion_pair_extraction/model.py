@@ -45,14 +45,14 @@ class AOPE(nn.Module):
         
         self.rel_att = RelationAttention(args)
 
-        self.crf = CRF(tag_to_ix={"<PAD>":0, "O":1, "B-T":2, "I-T":3,"B-P":4,"I-P":5, "<START>": 6, "<END>": 7})
+        self.crf = CRF(tag_size=7)
 
         self.dropout = nn.Dropout(self.drop)
 
         # parameters initialization
-        self.initial()
+        self.reset_parameters()
     
-    def initial(self):
+    def reset_parameters(self):
         init.xavier_uniform_(self.target_mlp._linear.weight)
         init.xavier_uniform_(self.rel_mlp._linear.weight)
         init.xavier_uniform_(self.hidden2tag._linear.weight)

@@ -55,7 +55,7 @@ class DependencyParser(nn.Module):
         embed_x = torch.cat([embed_word, embed_tag], dim=2)
         embed_x = self.dropout(embed_x)
 
-        lstm_output = self.bilstm(embed_x, seq_lens, batch_first=True)
+        lstm_output = self.bilstm(embed_x, seq_lens)
         lstm_output = self.dropout(lstm_output)
 
         all_dep = self.mlp_arc_dep(lstm_output)  

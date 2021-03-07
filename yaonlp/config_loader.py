@@ -7,9 +7,8 @@ from collections import namedtuple
 from yaonlp import checker
 
 
-# add type Config, NameTuple actually
-Config = NamedTuple
-
+# # add type Config, NameTuple actually
+# Config = NamedTuple
 
 def _load_json(config_file: str) -> dict:
     with open(config_file) as f:
@@ -22,7 +21,7 @@ def _dct_to_namespace(dct: dict) -> SimpleNamespace:
     return config_nspc
 
 
-def _dct_to_nametuple(dct: dict) -> Config: 
+def _dct_to_nametuple(dct: dict) -> Tuple[Any, ...]: # NamedTuple actually
     # MyTuple = namedtuple("config", list(dct.keys()))
     # config_ntpl = MyTuple(**dct)
     config_ntpl = namedtuple('config', dct.keys())(**dct)
