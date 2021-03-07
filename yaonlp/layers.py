@@ -12,14 +12,17 @@ class NonLinear(nn.Module):
                  in_features: int, 
                  out_features: int, 
                  activation: Optional[Callable] = None, 
-                 initial: Optional[Callable] = None) -> None: 
+                 init_func: Optional[Callable] = None) -> None: 
         super(NonLinear, self).__init__()
         self._linear = nn.Linear(in_features, out_features)
         self._activation = activation
 
-        if initial:
-            initial(self._linear.weight)
+        self.reset_parameters(init_func=init_func)
     
+    def reset_parameters(self, init_func: Optional[Callable] = None) -> None:
+        if init_func:
+            init_func(self._linear.weight)
+
     def forward(self, x):
         if self._activation:
             return self._activation(self._linear(x))
@@ -32,9 +35,10 @@ class BiLSTM(nn.Module):
                  hidden_size: int, 
                  num_layers: int = 1,
                  batch_first: bool = True, 
-                 dropout: float = 0) -> None: 
+                 dropout: float = 0, 
+                 init_func: Optional[Callable] = None) -> None: 
         super(BiLSTM, self).__init__()
-        self.lstm = nn.LSTM(input_size=input_size, 
+        self._lstm = nn.LSTM(input_size=input_size, 
                             hidden_size=hidden_size,
                             num_layers=num_layers, 
                             batch_first=True, 
@@ -42,17 +46,27 @@ class BiLSTM(nn.Module):
                             dropout=dropout)
         self.batch_first = batch_first
 
+        self.reset_parameters(init_func=init_func)
+
+    def reset_parameters(self, init_func: Optional[Callable] = None) -> None:
+        if init_func:
+            init_func(self._lstm.weight)
+
     def forward(self, inputs: torch.Tensor, seq_lens: torch.Tensor):
         seq_packed = torch.nn.utils.rnn.pack_padded_sequence(inputs, seq_lens, batch_first=self.batch_first)
   
-        lsmt_output, _ = self.lstm(seq_packed)   # lsmt_output: *, hidden_size * num_directions
+        lsmt_output, _ = self._lstm(seq_packed)   # lsmt_output: *, hidden_size * num_directions
         # seq_unpacked: batch_size, seq_max_len in batch, hidden_size * num_directions
         seq_unpacked, _ = torch.nn.utils.rnn.pad_packed_sequence(lsmt_output, batch_first=self.batch_first)  
         return seq_unpacked
     
 
 class Biaffine(nn.Module):
-    def __init__(self, in1_features: int, in2_features: int, out_features: int):
+    def __init__(self, 
+                 in1_features: int, 
+                 in2_features: int, 
+                 out_features: int,
+                 init_func: Optional[Callable] = None) -> None:
         super(Biaffine, self).__init__()
         self.in1_features = in1_features
         self.in2_features = in2_features
@@ -62,14 +76,20 @@ class Biaffine(nn.Module):
         self.linear_out_features = out_features * in2_features
 
         # with bias default
-        self.linear = nn.Linear(in_features=self.linear_in_features,
+        self._linear = nn.Linear(in_features=self.linear_in_features,
                                 out_features=self.linear_out_features)
+
+        self.reset_parameters(init_func=init_func)
+
+    def reset_parameters(self, init_func: Optional[Callable] = None) -> None:
+        if init_func:
+            init_func(self._linear.weight)
 
     def forward(self, input1: torch.Tensor, input2: torch.Tensor):
         batch_size, len1, dim1 = input1.size()
         batch_size, len2, dim2 = input2.size()
 
-        affine = self.linear(input1)
+        affine = self._linear(input1)
 
         affine = affine.view(batch_size, len1*self.out_features, dim2)
         input2 = torch.transpose(input2, 1, 2)
