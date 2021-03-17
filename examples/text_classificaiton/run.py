@@ -8,7 +8,7 @@ from trainer import MyTrainer
 from functional import cross_entropy, compute_acc
 
 from yaonlp.config_loader import load_config
-from yaonlp.data import MyDataLoader, train_val_split, DataLoader
+from yaonlp.data import train_val_split, DataLoader
 
 
 if __name__ == "__main__":
@@ -21,9 +21,6 @@ if __name__ == "__main__":
 
     train_dataset, val_dataset = train_val_split(train_dataset, data_config["val_ratio"])
 
-    # train_iter = MyDataLoader(train_dataset, config=data_config)
-    # val_iter = MyDataLoader(val_dataset, config=data_config)
-    # test_iter = MyDataLoader(test_dataset, config=data_config)
     train_iter = DataLoader(dataset=train_dataset, 
                             batch_size=data_config["batch_size"], 
                             shuffle=data_config["shuffle"])
