@@ -55,10 +55,10 @@ class BiLSTM(nn.Module):
     def forward(self, inputs: torch.Tensor, seq_lens: torch.Tensor):
         seq_packed = torch.nn.utils.rnn.pack_padded_sequence(inputs, seq_lens, batch_first=self.batch_first)
   
-        lsmt_output, _ = self._lstm(seq_packed)   # lsmt_output: *, hidden_size * num_directions
+        lsmt_output, hidden = self._lstm(seq_packed)   # lsmt_output: *, hidden_size * num_directions
         # seq_unpacked: batch_size, seq_max_len in batch, hidden_size * num_directions
         seq_unpacked, _ = torch.nn.utils.rnn.pad_packed_sequence(lsmt_output, batch_first=self.batch_first)  
-        return seq_unpacked
+        return seq_unpacked, hidden
     
 
 class Biaffine(nn.Module):

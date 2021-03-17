@@ -5,7 +5,7 @@ from torch.utils.data._utils import collate
 import torch.nn.utils.rnn as rnn_utils
 
 import os
-from typing import List, Callable, Optional, Any
+from typing import List, Callable, Optional, Any, Union
 
 
 # class MyDataLoader(DataLoader):
@@ -26,9 +26,9 @@ def train_val_split(train_dataset: Dataset, val_ratio: float) -> List: # List[Su
 
 
 class SortPadCollator():
-    def __init__(self, sort_key: Callable, ignore_index: Optional[int] = None, reverse: bool = True):
+    def __init__(self, sort_key: Callable, ignore_indics: Union[int, list] = [], reverse: bool = True):
         self.sort_key = sort_key
-        self.ignore_index = ignore_index
+        self.ignore_indics = ignore_indics
         self.reverse = reverse
     
     def _collate_fn(self, batch):
@@ -43,11 +43,16 @@ class SortPadCollator():
         elif isinstance(batch, torch.Tensor):
             batch.sort(dim=-1, descending=self.reverse)
 
+        if self.ignore_indics is None:
+            self.ignore_indics = []
+        elif isinstance(self.ignore_indics, int):
+            self.ignore_indics = [self.ignore_indics]
+
         ret = []
         for i, samples in enumerate(zip(*batch)):
-            if i == self.ignore_index:
+            if i in self.ignore_indics:
                 ret.append(torch.tensor(samples))
-                break
+                continue
             samples = rnn_utils.pad_sequence(samples, batch_first=True, padding_value=0)  # padding
             ret.append(samples)
         return ret
