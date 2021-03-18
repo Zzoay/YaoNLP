@@ -6,40 +6,76 @@ from collections import Counter
 import time
 
 class TTDataset(Dataset):
-    def __init__(self, vocab, vocab_file) -> None:
+    def __init__(self, vocab: dict, data_file: str) -> None:
         self.data_file = data_file
-        self.vocab_file = vocab_file
 
-        self.summ_lst, self.article_lst, self.summ_lens, self.article_lens = self.read_data(vocab, data_file)
+        self.summ_lst, self.article_lst, self.article_extend_lst, self.summ_lens, self.article_lens = self.read_data(vocab, data_file)
 
-    def read_data(self, vocab, data_file):
+    def read_data(self, 
+                  vocab: dict,
+                  data_file: str, 
+                  max_summ_len: int = 200, 
+                  max_article_len: int = 800) -> tuple:
         with open(self.data_file, 'r', encoding='utf-8') as f:
             summ_lst = list()
             article_lst = list()
+            article_extend_lst = list()
+
             summ_lens = list()
             article_lens = list()
-
             for line in f.readlines():
                 line_dct = eval(line)
                 summ = line_dct['summarization']
                 article = line_dct['article']
 
-                summ_tmp = [vocab.get(x, 0) for x in summ]
-                article_tmp = [vocab.get(x, 0) for x in article]
+                summ_ids = [vocab.get(x, 0) for x in summ]
+                # article_ids = [vocab.get(x, 0) for x in article]
+                article_ids, article_extend_vocab, oovs = self.article2ids(vocab, article)  # extend oov
 
-                summ_lens.append(len(summ_tmp))
-                article_lens.append(len(article_tmp))
+                summ_len = len(summ_ids)
+                article_len = len(article_ids)
 
-                summ_lst.append(torch.tensor(summ_tmp))
-                article_lst.append(torch.tensor(article_tmp))
+                # truncation
+                if summ_len > max_summ_len:
+                    summ_len = max_summ_len
+                    summ_ids = summ_ids[:max_summ_len]
+                
+                if article_len > max_article_len:
+                    article_len = max_article_len
+                    article_ids = article_ids[:max_article_len]
+
+                summ_lens.append(summ_len)
+                article_lens.append(article_len)
+
+                summ_lst.append(torch.tensor(summ_ids))
+                article_lst.append(torch.tensor(article_ids))
+                article_extend_lst.append(torch.tensor(article_extend_vocab).long())
             
-            return summ_lst, article_lst, summ_lens, article_lens
+            return summ_lst, article_lst, article_extend_lst, summ_lens, article_lens
+    
+    # extend oov
+    def article2ids(self, vocab, article):
+        ids = []
+        extend_ids = []
+        oovs= []
+        for w in article:
+            try:
+                idx = vocab[w]
+                ids.append(idx)
+                extend_ids.append(idx)
+            except KeyError:  # oov
+                ids.append(vocab['<UNK>'])  # add <UNK>
+                if w not in oovs:
+                    oovs.append(w)
+                oov_num = oovs.index(w)
+                extend_ids.append(len(vocab) + oov_num)  # extend
+        return ids, extend_ids, oovs
 
-        def __getitem__(self, index):
-            return self.summ_lst[idx], self.article_lst[idx], self.summ_lens[idx], self.article_lens[idx]
-        
-        def __len__(self):
-            return len(self.article_lst)
+    def __getitem__(self, idx):
+        return self.summ_lst[idx], self.article_lst[idx], self.article_extend_lst[idx], self.summ_lens[idx], self.article_lens[idx]
+    
+    def __len__(self):
+        return len(self.article_lst)
 
 class Vocab(object):
     def __init__(self, data_file, vocab_file, min_freq=4):
@@ -77,11 +113,15 @@ class Vocab(object):
                     character, freq = line.split(' ')
                 except ValueError:
                     continue
+                # vocab file sorted already
                 if int(freq) < self.min_freq:    
                     break
                 char_dct[character] = cnt
                 cnt+=1
 
+            # add <PAD>, <UNK> token
+            char_dct['<PAD>'] = 0
+            char_dct['<UNK>'] = cnt-1
             return char_dct
     
     def get_vocab(self):
