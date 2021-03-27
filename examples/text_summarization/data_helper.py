@@ -9,7 +9,7 @@ class TTDataset(Dataset):
     def __init__(self, vocab: dict, data_file: str) -> None:
         self.data_file = data_file
 
-        self.summ_lst, self.article_lst, self.article_extend_lst, self.summ_lens, self.article_lens = self.read_data(vocab, data_file)
+        self.summ_lst, self.article_lst, self.article_extend_lst, self.summ_lens, self.article_lens, self.oov_nums = self.read_data(vocab, data_file)
 
     def read_data(self, 
                   vocab: dict,
@@ -21,6 +21,7 @@ class TTDataset(Dataset):
             article_lst = list()
             article_extend_lst = list()
 
+            oov_nums = list()
             summ_lens = list()
             article_lens = list()
             for line in f.readlines():
@@ -34,15 +35,20 @@ class TTDataset(Dataset):
 
                 summ_len = len(summ_ids)
                 article_len = len(article_ids)
+                oov_nums.append(len(oovs))
 
                 # truncation
                 if summ_len > max_summ_len:
                     summ_len = max_summ_len
                     summ_ids = summ_ids[:max_summ_len]
                 
+                # truncate
                 if article_len > max_article_len:
                     article_len = max_article_len
                     article_ids = article_ids[:max_article_len]
+
+                if len(article_extend_vocab) > max_article_len:
+                    article_extend_vocab = article_extend_vocab[:max_article_len]
 
                 summ_lens.append(summ_len)
                 article_lens.append(article_len)
@@ -51,7 +57,7 @@ class TTDataset(Dataset):
                 article_lst.append(torch.tensor(article_ids))
                 article_extend_lst.append(torch.tensor(article_extend_vocab).long())
             
-            return summ_lst, article_lst, article_extend_lst, summ_lens, article_lens
+            return summ_lst, article_lst, article_extend_lst, summ_lens, article_lens, oov_nums
     
     # extend oov
     def article2ids(self, vocab, article):
@@ -72,7 +78,7 @@ class TTDataset(Dataset):
         return ids, extend_ids, oovs
 
     def __getitem__(self, idx):
-        return self.summ_lst[idx], self.article_lst[idx], self.article_extend_lst[idx], self.summ_lens[idx], self.article_lens[idx]
+        return self.summ_lst[idx], self.article_lst[idx], self.article_extend_lst[idx], self.summ_lens[idx], self.article_lens[idx], self.oov_nums[idx]
     
     def __len__(self):
         return len(self.article_lst)

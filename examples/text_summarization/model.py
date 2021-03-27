@@ -19,6 +19,12 @@ class PointerGenerator(nn.Module):
         self.vocab_size = vocab_size
         self.emb_dim = emb_dim
         self.dropout = dropout
+
+        # TODO configurable
+        self.coverage_loss_weight = 1.0  # lambda, equation 13
+
+        self.use_coverage =  True
+        self.use_pgen = True
         
         self.encoder = Encoder(vocab_size, emb_dim, hidden_size, dropout)
         self.reduce_state = ReduceState(hidden_size)
@@ -28,6 +34,7 @@ class PointerGenerator(nn.Module):
                 enc_inputs,
                 enc_lens, 
                 enc_inputs_extend,
+                oov_nums,
                 dec_inputs, 
                 dec_lens,
                 max_len=150):
@@ -43,18 +50,35 @@ class PointerGenerator(nn.Module):
         context_vector = torch.zeros(batch_size, self.hidden_size * 2)
         coverage_vector = torch.zeros(enc_states.size()[:2])   # (batch_size, seq_len)
 
+        step_losses = []
         for step in range(min(max(dec_lens), max_len)):
             dec_prev = dec_inputs[:, step]
 
-            final_dist, dec_state, h_star_t, attn_dist, p_gen, coverage_vector =  \
+            final_dist, dec_state, h_star_t, attn_dist, p_gen, next_coverage =  \
                 self.decoder(prev_target=dec_prev, 
                              prev_dec_state=dec_state, 
                              enc_states=enc_states, 
                              enc_input_extend=enc_inputs_extend,
+                             oov_nums=oov_nums,
                              prev_context_vector=context_vector,
                              prev_coverage=coverage_vector)
             
-        return 
+            loss = final_dist.gather(1, dec_prev.unsqueeze(1)).squeeze()  # (batch_size, )
+            step_loss = -torch.log(loss)
+
+            if self.use_coverage:
+                step_coveraged_loss = torch.sum(torch.min(attn_dist, coverage_vector))  # equation 12
+                step_loss = step_loss + self.coverage_loss_weight * step_coveraged_loss  # equation 13
+
+                coverage_vector = next_coverage
+            
+            step_losses.append(step_loss)
+
+        sum_losses = torch.sum(torch.stack(step_losses, 1), 1)
+        batch_avg_loss = sum_losses / dec_lens
+        loss = torch.mean(batch_avg_loss)
+ 
+        return loss
 
 
 class Encoder(nn.Module):
@@ -139,17 +163,17 @@ class Attention(nn.Module):
         e = F.tanh(attn_feats)
         e = self.v(e)
 
-        # calculate attention distribution 'a', eqution 2
+        # calculate attention distribution 'a', equation 2
         attn_dist = F.softmax(e, dim=1).transpose(1, 2)  # (batch_size, 1, seq_len)
 
-        # eqution 3, calculate context vectors 'h_star_t
+        # equation 3, calculate context vectors 'h_star_t
         context_vector = torch.bmm(attn_dist, enc_states)  
         context_vector = context_vector.squeeze(1) # (batch_size, hidden_size * 2)
 
         # squeeze, (batch_size, seq_len)
         attn_dist = attn_dist.squeeze(1) 
 
-        # c_t, eqution 10
+        # c_t, equation 10
         if self.use_coverage:
             coverage_vector = coverage_vector.squeeze(2)  # (batch_size, seq_len)
             coverage_vector = coverage_vector + attn_dist
@@ -188,7 +212,15 @@ class Decoder(nn.Module):
 
         self.p_gen = nn.Linear(hidden_size * 4 + emb_dim, 1)
     
-    def forward(self, prev_target, prev_dec_state, enc_states, enc_input_extend, prev_context_vector, prev_coverage):
+    def forward(self, 
+                prev_target,
+                prev_dec_state, 
+                enc_states, 
+                enc_input_extend, 
+                oov_nums, 
+                prev_context_vector, 
+                prev_coverage):
+        batch_size, seq_len, _ = enc_states.size()
         # decoder state 's_t'  
         target_emb = self.embedding(prev_target)
         # project target embedding and context vectors into a new embedding space
@@ -204,21 +236,25 @@ class Decoder(nn.Module):
         # (batch_size, hidden_size * 2); (batch_size, seq_len); (batch_size, seq_len);
         h_star_t, attn_dist, coverage_vector = self.attention(dec_state_hat, enc_states, prev_coverage)
 
-        # calculate vocab distribution P_vocab, eqution 4
+        # calculate vocab distribution P_vocab, equation 4
         combine_pv = torch.cat((lstm_out.squeeze(1), h_star_t), dim=1)
         vocab_dist = F.softmax(self.p_vocab2(self.p_vocab1(combine_pv)), dim=1)  # (batch_size, vocab_size)
 
         if self.use_pgen:
-            # calculate P_gen, eqution 8
+            # calculate P_gen, equation 8
             combine_pg = torch.cat((dec_state_hat, h_star_t, x_context), dim=1)
             p_gen = F.sigmoid(self.p_gen(combine_pg))
 
-            # calculate final distribution P_w, eqution 9
+            # calculate final distribution P_w, equation 9
             vocab_dist_ = p_gen * vocab_dist
             attn_dist_ = (1 - p_gen) * attn_dist
+
+            # extend vocab
+            max_oov_nums = torch.max(oov_nums)
+            extra_zeros = torch.zeros(batch_size, max_oov_nums)
+            vocab_dist_ = torch.cat((vocab_dist_, extra_zeros), dim=1)
             # final_dist = vocab_dist_ + attn_dist_
-            # TODO extend vocab
-            final_dist = vocab_dist_.scatter_add(dim=1, index=prev_context_vector.long(), src=attn_dist_)
+            final_dist = vocab_dist_.scatter_add(dim=1, index=enc_input_extend, src=attn_dist_)
         else:
             final_dist = vocab_dist
 

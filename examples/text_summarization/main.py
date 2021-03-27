@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     train_dataset, val_dataset = train_val_split(train_dataset=dataset, val_ratio=val_ratio)
 
-    sp_collator = SortPadCollator(sort_key=lambda x:x[4], ignore_indics=[3,4]) 
+    sp_collator = SortPadCollator(sort_key=lambda x:x[4], ignore_indics=[3, 4, 5]) 
 
     train_iter = DataLoader(dataset=train_dataset,  
                             batch_size=batch_size, 

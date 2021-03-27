@@ -19,14 +19,21 @@ class MyTrainer(Trainer):
 
         for epoch in range(1, self.epochs + 1):
             for batch in train_iter:
-                summ, article, article_extend, summ_lens, article_lens = batch
+                summ, article, article_extend, summ_lens, article_lens, oov_nums = batch
 
-                outputs = model(enc_inputs=article, 
-                                enc_lens=article_lens,  
-                                enc_inputs_extend=article_extend,
-                                dec_inputs=summ, 
-                                dec_lens=summ_lens)
+                optim.zero_grad()
 
+                loss = model(enc_inputs=article, 
+                             enc_lens=article_lens,  
+                             enc_inputs_extend=article_extend,
+                             oov_nums=oov_nums,
+                             dec_inputs=summ, 
+                             dec_lens=summ_lens)
+
+                print(loss)
+                loss.backward()
+                
+                optim.step()
         return
     
     def eval(self, model: nn.Module, test_iter: DataLoader) -> None:
