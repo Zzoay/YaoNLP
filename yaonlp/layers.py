@@ -115,7 +115,7 @@ class CRF(nn.Module):
         # Matrix of transition parameters.  
         # Entry i,j is the score of transitioning to i from j.
         if to_cuda:
-           self.transitions = nn.Parameter(torch.empty(self.tag_size, self.tag_size)).cuda() 
+            self.transitions = nn.Parameter(torch.empty(self.tag_size, self.tag_size)).cuda() 
         else:
             self.transitions = nn.Parameter(torch.empty(self.tag_size, self.tag_size))
         self.reset_parameters(init_func=init_func)
