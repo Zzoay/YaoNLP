@@ -8,12 +8,11 @@ from yaonlp.trainer import Trainer
 from yaonlp.utils import to_cuda
 
 class MyTrainer(Trainer):
-    def __init__(self, epochs, prt_erery_step, eval_every_step, use_cuda) -> None:
-        self.epochs = epochs
-        self.prt_erery_step = prt_erery_step 
-        self.eval_every_step = eval_every_step
-        self.use_cuda = use_cuda
-        return
+    def __init__(self, config)-> None:
+        self.epochs = config.epochs
+        self.prt_erery_step = config.prt_erery_step 
+        self.eval_every_step = config.eval_every_step
+        self.use_cuda = config.use_cuda
 
     def train(self, model: nn.Module, train_iter: DataLoader, val_iter: DataLoader) -> None:
         model.train()
@@ -42,7 +41,7 @@ class MyTrainer(Trainer):
                     print(f"Steps {step}, loss: {loss.item()}")
                 
                 if (step+1) % self.eval_every_step == 0:
-                    self.eval(model.eval(), val_iter)
+                    self.eval(model, val_iter)
 
                     model.train()
 
@@ -51,8 +50,11 @@ class MyTrainer(Trainer):
                 optim.step()
 
                 step += 1
-
+        self.eval(model, val_iter)
+        
     def eval(self, model: nn.Module, test_iter: DataLoader) -> None:
+        model.eval()
+
         if self.use_cuda and torch.cuda.is_available():
             model = model.cuda()
 
@@ -79,3 +81,7 @@ class MyTrainer(Trainer):
 
         loss_avg = loss_sum / cnt_batch
         print(f"--Evaluation, loss: {loss_avg} \n")
+    
+    def save_model(self, model: nn.Module, save_file: str):
+        # TODO save model with experiment result
+        torch.save(model.state_dict(), save_file)

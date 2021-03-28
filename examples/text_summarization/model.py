@@ -8,24 +8,30 @@ from yaonlp.utils import to_cuda
 
 
 class PointerGenerator(nn.Module):
+    # def __init__(self,
+    #              input_size, 
+    #              hidden_size,
+    #              vocab_size,
+    #              emb_dim,
+    #              dropout,
+    #              use_cuda,
+    #              mode = "baseline",
+    #              model_file = None) -> None:
     def __init__(self,
-                 input_size, 
-                 hidden_size,
+                 config,
                  vocab_size,
-                 emb_dim,
-                 dropout,
-                 use_cuda,
-                 mode="baseline") -> None:
+                 mode = "baseline",
+                 model_file = None) -> None:
         super(PointerGenerator, self).__init__()
-        self.input_size = input_size
-        self.hidden_size = hidden_size
+        self.input_size = config.input_size
+        self.hidden_size = config.hidden_size
         self.vocab_size = vocab_size
-        self.emb_dim = emb_dim
-        self.dropout = dropout
-        self.use_cuda = use_cuda
+        self.emb_dim = config.emb_dim
+        self.dropout = config.dropout
+        self.use_cuda = config.use_cuda
 
         # TODO configurable
-        self.coverage_loss_weight = 1.0  # lambda, equation 13
+        self.coverage_loss_weight = config.coverage_loss_weight # lambda, equation 13
 
         self.use_coverage =  True
         self.use_pgen = True
@@ -33,7 +39,7 @@ class PointerGenerator(nn.Module):
         self.mode = mode
         
         if mode == "baseline":
-            self.encoder = EncoderBased(vocab_size, emb_dim, hidden_size, dropout)
+            self.encoder = EncoderBased(self.vocab_size, self.emb_dim, self.hidden_size, self.dropout)
         elif mode == "syntax_enhanced":
             self.encoder = EncoderSyntaxEnhanced()
         elif mode == "bert_enhanced":
@@ -41,8 +47,14 @@ class PointerGenerator(nn.Module):
         elif mode == "joint_enhanced":
             self.encoder = EncoderJointEnhanced()
 
-        self.reduce_state = ReduceState(hidden_size)
-        self.decoder = Decoder(vocab_size, emb_dim, hidden_size, dropout, use_cuda)
+        self.reduce_state = ReduceState(self.hidden_size)
+        self.decoder = Decoder(self.vocab_size, self.emb_dim, self.hidden_size, self.dropout, self.use_cuda)
+
+        if model_file is not None:
+            state = torch.load(model_file, map_location= lambda storage, location: storage)  # TODO CPU storage?
+            self.encoder.load_state_dict(state['encoder_state_dict'])
+            self.decoder.load_state_dict(state['decoder_state_dict'], strict=False)
+            self.reduce_state.load_state_dict(state['reduce_state_dict'])
 
     def forward(self,     
                 enc_inputs,
