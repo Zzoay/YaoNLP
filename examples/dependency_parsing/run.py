@@ -49,4 +49,7 @@ if __name__ == "__main__":
 
     trainer.train(model=model, train_iter=train_iter, val_iter=val_iter)
     trainer.eval(model=model, eval_iter=val_iter)
+    
+    import torch
+    torch.save(model, "parser.pt")
     print("finished.")

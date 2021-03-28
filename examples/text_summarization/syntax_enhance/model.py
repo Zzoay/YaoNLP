@@ -47,8 +47,28 @@ class DependencyParser(nn.Module):
         self.rel_biaffine = Biaffine(mlp_rel_size, mlp_rel_size, rel_size)
 
         self.dropout = nn.Dropout(dropout)
-        
+
+    def encode(self, words, tags, seq_lens, eval=False):
+        embed_word = self.word_emb(words)   # batch_size, seq_len, embed_dim
+        embed_tag = self.tag_emb(tags) # batch_size, seq_len, embed_dim
+
+        embed_x = torch.cat([embed_word, embed_tag], dim=2)
+        embed_x = self.dropout(embed_x)
+
+        lstm_output, _ = self.bilstm(embed_x, seq_lens)
+        lstm_output = self.dropout(lstm_output)
+
+        all_dep = self.mlp_arc_dep(lstm_output)  
+        all_head = self.mlp_arc_head(lstm_output)
+
+        all_dep = self.dropout(all_dep)
+        all_head = self.dropout(all_head)
+
+        return (embed_x, lstm_output, all_dep, all_head)    
+
     def forward(self, words, tags, heads, seq_lens, eval=False):  # x: batch_size, seq_len
+        raise RuntimeError("This parser only use for encoding!")
+
         embed_word = self.word_emb(words)   # batch_size, seq_len, embed_dim
         embed_tag = self.tag_emb(tags) # batch_size, seq_len, embed_dim
 
@@ -85,22 +105,3 @@ class DependencyParser(nn.Module):
         index = heads.unsqueeze(2).unsqueeze(3).expand(-1, -1, -1, rel_logit_cond.shape[-1]) 
         rel_logit = torch.gather(rel_logit_cond, dim=2, index=index).squeeze(2)
         return arc_logit, rel_logit
-
-
-    def encode(self, words, tags, seq_lens, eval=False):
-        embed_word = self.word_emb(words)   # batch_size, seq_len, embed_dim
-        embed_tag = self.tag_emb(tags) # batch_size, seq_len, embed_dim
-
-        embed_x = torch.cat([embed_word, embed_tag], dim=2)
-        embed_x = self.dropout(embed_x)
-
-        lstm_output, _ = self.bilstm(embed_x, seq_lens)
-        lstm_output = self.dropout(lstm_output)
-
-        all_dep = self.mlp_arc_dep(lstm_output)  
-        all_head = self.mlp_arc_head(lstm_output)
-
-        all_dep = self.dropout(all_dep)
-        all_head = self.dropout(all_head)
-
-        return (embed_x, lstm_output, all_dep, all_head)

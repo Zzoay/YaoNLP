@@ -5,9 +5,20 @@ from torch.utils.data import Dataset
 from collections import Counter
 import time
 
+from .syntax_enhance.tokenizer import Tokenizer
+
+
 class TTDataset(Dataset):
-    def __init__(self, vocab: dict, data_file: str) -> None:
+    def __init__(self, 
+                 vocab: dict, 
+                 data_file: str, 
+                 use_syn_enhance: bool = False, 
+                 parser_vocab_file: str = '') -> None:
         self.data_file = data_file
+
+        self.use_syn_enhance = use_syn_enhance
+        if use_syn_enhance:
+            self.tokenizer = Tokenizer(vocab_file=parser_vocab_file)
 
         self.summ_lst, self.article_lst, self.article_extend_lst, self.summ_lens, self.article_lens, self.oov_nums = self.read_data(vocab, data_file)
 
@@ -33,25 +44,15 @@ class TTDataset(Dataset):
                 # article_ids = [vocab.get(x, 0) for x in article]
                 article_ids, article_extend_vocab, oovs = self.article2ids(vocab, article)  # extend oov
 
-                summ_len = len(summ_ids)
-                article_len = len(article_ids)
-                oov_nums.append(len(oovs))
-
                 # truncation
-                if summ_len > max_summ_len:
-                    summ_len = max_summ_len
-                    summ_ids = summ_ids[:max_summ_len]
-                
-                # truncate
-                if article_len > max_article_len:
-                    article_len = max_article_len
-                    article_ids = article_ids[:max_article_len]
-
-                if len(article_extend_vocab) > max_article_len:
-                    article_extend_vocab = article_extend_vocab[:max_article_len]
+                article_ids, article_len = self.truncate(article_ids, max_article_len)
+                summ_ids, summ_len = self.truncate(summ_ids, max_summ_len)
+                article_extend_vocab, _ = self.truncate(article_extend_vocab, max_article_len)
 
                 summ_lens.append(summ_len)
                 article_lens.append(article_len)
+
+                oov_nums.append(len(oovs))
 
                 summ_lst.append(torch.tensor(summ_ids))
                 article_lst.append(torch.tensor(article_ids))
@@ -70,13 +71,22 @@ class TTDataset(Dataset):
                 ids.append(idx)
                 extend_ids.append(idx)
             except KeyError:  # oov
-                ids.append(vocab['<UNK>'])  # add <UNK>
+                ids.append(vocab['<unk>'])  # add <unk>
                 if w not in oovs:
                     oovs.append(w)
                 oov_num = oovs.index(w)
                 extend_ids.append(len(vocab) + oov_num)  # extend
         return ids, extend_ids, oovs
 
+
+    def truncate(self, ids_list, max_length):
+        length = len(ids_list)
+        if length > max_length:
+            length = max_length
+            ids_list = ids_list[:max_length]
+        
+        return ids_list, length
+        
     def __getitem__(self, idx):
         return self.summ_lst[idx], self.article_lst[idx], self.article_extend_lst[idx], self.summ_lens[idx], self.article_lens[idx], self.oov_nums[idx]
     
@@ -126,8 +136,8 @@ class Vocab(object):
                 cnt+=1
 
             # add <PAD>, <UNK> token
-            char_dct['<PAD>'] = 0
-            char_dct['<UNK>'] = cnt-1
+            char_dct['<pad>'] = 0
+            char_dct['<unk>'] = cnt-1
             return char_dct
     
     def get_vocab(self):

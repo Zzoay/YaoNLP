@@ -96,8 +96,6 @@ class Encoder(nn.Module):
                              num_layers=1, 
                              batch_first=True, 
                              dropout=dropout)
-        
-        self.proj = nn.Linear(hidden_size * 2, hidden_size * 2, bias=False)
 
     def forward(self, inputs, seq_lens):
         embedding = self.embedding(inputs)
@@ -106,6 +104,32 @@ class Encoder(nn.Module):
         enc_states = enc_states.contiguous()
 
         return enc_states, hidden
+
+
+class EncoderSyntaxEnhanced(nn.Module):
+    def __init__(self) -> None:
+        super(EncoderSyntaxEnhanced, self).__init__()
+
+    def forward(self):
+
+        return
+
+
+class EncoderBertEnhanced(nn.Module):
+    def __init__(self) -> None:
+        super(EncoderBertEnhanced, self).__init__()
+    def forward(self):
+
+        return
+
+
+class EncoderJointEnhanced(nn.Module):
+    def __init__(self) -> None:
+        super(EncoderJointEnhanced, self).__init__()
+    
+    def forward(self):
+
+        return
 
 
 # Add to the graph a linear layer to reduce the encoder's final hiddent and cell state into a single initial state for the decoder

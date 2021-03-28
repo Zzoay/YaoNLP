@@ -145,3 +145,4 @@ data/TTNewsCorpus_NLPCC2017
 
 pretrained_model/bert
 pretrained_model/bert-base-uncased
+pretrained_model/dependency_parser
