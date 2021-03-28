@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 from collections import Counter
 import time
 
-from .syntax_enhance.tokenizer import Tokenizer
+from syntax_enhance.tokenizer import ParserTokenizer
 
 
 class TTDataset(Dataset):
@@ -18,7 +18,7 @@ class TTDataset(Dataset):
 
         self.use_syn_enhance = use_syn_enhance
         if use_syn_enhance:
-            self.tokenizer = Tokenizer(vocab_file=parser_vocab_file)
+            self.tokenizer = ParserTokenizer(vocab_file=parser_vocab_file)
 
         self.summ_lst, self.article_lst, self.article_extend_lst, self.summ_lens, self.article_lens, self.oov_nums = self.read_data(vocab, data_file)
 

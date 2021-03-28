@@ -4,6 +4,7 @@ from torch import nn
 from torch.nn import functional as F
 
 from yaonlp.layers import BiLSTM
+from yaonlp.utils import to_cuda
 
 
 class PointerGenerator(nn.Module):
@@ -12,23 +13,36 @@ class PointerGenerator(nn.Module):
                  hidden_size,
                  vocab_size,
                  emb_dim,
-                 dropout) -> None:
+                 dropout,
+                 use_cuda,
+                 mode="baseline") -> None:
         super(PointerGenerator, self).__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.vocab_size = vocab_size
         self.emb_dim = emb_dim
         self.dropout = dropout
+        self.use_cuda = use_cuda
 
         # TODO configurable
         self.coverage_loss_weight = 1.0  # lambda, equation 13
 
         self.use_coverage =  True
         self.use_pgen = True
+
+        self.mode = mode
         
-        self.encoder = Encoder(vocab_size, emb_dim, hidden_size, dropout)
+        if mode == "baseline":
+            self.encoder = EncoderBased(vocab_size, emb_dim, hidden_size, dropout)
+        elif mode == "syntax_enhanced":
+            self.encoder = EncoderSyntaxEnhanced()
+        elif mode == "bert_enhanced":
+            self.encoder = EncoderBertEnhanced()
+        elif mode == "joint_enhanced":
+            self.encoder = EncoderJointEnhanced()
+
         self.reduce_state = ReduceState(hidden_size)
-        self.decoder = Decoder(vocab_size, emb_dim, hidden_size, dropout)
+        self.decoder = Decoder(vocab_size, emb_dim, hidden_size, dropout, use_cuda)
 
     def forward(self,     
                 enc_inputs,
@@ -50,6 +64,9 @@ class PointerGenerator(nn.Module):
         context_vector = torch.zeros(batch_size, self.hidden_size * 2)
         coverage_vector = torch.zeros(enc_states.size()[:2])   # (batch_size, seq_len)
 
+        if self.use_cuda and torch.cuda.is_available():
+            context_vector, coverage_vector = to_cuda(data=(context_vector, coverage_vector))
+
         step_losses = []
         for step in range(min(max(dec_lens), max_len)):
             dec_prev = dec_inputs[:, step]
@@ -63,8 +80,8 @@ class PointerGenerator(nn.Module):
                              prev_context_vector=context_vector,
                              prev_coverage=coverage_vector)
             
-            loss = final_dist.gather(1, dec_prev.unsqueeze(1)).squeeze()  # (batch_size, )
-            step_loss = -torch.log(loss)
+            gold_probs = final_dist.gather(1, dec_prev.unsqueeze(1)).squeeze()  # (batch_size, )
+            step_loss = -torch.log(gold_probs)
 
             if self.use_coverage:
                 step_coveraged_loss = torch.sum(torch.min(attn_dist, coverage_vector))  # equation 12
@@ -75,19 +92,21 @@ class PointerGenerator(nn.Module):
             step_losses.append(step_loss)
 
         sum_losses = torch.sum(torch.stack(step_losses, 1), 1)
+        if self.use_cuda and torch.cuda.is_available():
+            dec_lens = dec_lens.cuda()
         batch_avg_loss = sum_losses / dec_lens
         loss = torch.mean(batch_avg_loss)
  
         return loss
 
 
-class Encoder(nn.Module):
+class EncoderBased(nn.Module):
     def __init__(self, 
                  vocab_size, 
                  emb_dim,
                  hidden_size, 
                  dropout) -> None:
-        super(Encoder, self).__init__()
+        super(EncoderBased, self).__init__()
         self.embedding = nn.Embedding(num_embeddings=vocab_size, 
                                       embedding_dim=emb_dim)
 
@@ -210,13 +229,16 @@ class Decoder(nn.Module):
                  vocab_size, 
                  emb_dim,
                  hidden_size,
-                 dropout) -> None:
+                 dropout,
+                 use_cuda) -> None:
         super(Decoder, self).__init__()
         self.hidden_size = hidden_size
 
         self.use_coverage = True
         self.use_pgen = True
         
+        self.use_cuda = use_cuda
+
         self.embedding = nn.Embedding(num_embeddings=vocab_size, 
                                       embedding_dim=emb_dim)
 
@@ -276,6 +298,8 @@ class Decoder(nn.Module):
             # extend vocab
             max_oov_nums = torch.max(oov_nums)
             extra_zeros = torch.zeros(batch_size, max_oov_nums)
+            if self.use_cuda and torch.cuda.is_available():
+                extra_zeros = extra_zeros.cuda()
             vocab_dist_ = torch.cat((vocab_dist_, extra_zeros), dim=1)
             # final_dist = vocab_dist_ + attn_dist_
             final_dist = vocab_dist_.scatter_add(dim=1, index=enc_input_extend, src=attn_dist_)
