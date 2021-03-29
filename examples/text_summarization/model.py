@@ -39,7 +39,7 @@ class PointerGenerator(nn.Module):
         self.mode = mode
         
         if mode == "baseline":
-            self.encoder = EncoderBased(self.vocab_size, self.emb_dim, self.hidden_size, self.dropout)
+            self.encoder = EncoderBase(self.vocab_size, self.emb_dim, self.hidden_size, self.dropout)
         elif mode == "syntax_enhanced":
             self.encoder = EncoderSyntaxEnhanced()
         elif mode == "bert_enhanced":
@@ -112,7 +112,7 @@ class PointerGenerator(nn.Module):
         return loss
 
 
-class EncoderBased(nn.Module):
+class EncoderBase(nn.Module):
     def __init__(self, 
                  vocab_size, 
                  emb_dim,
@@ -141,9 +141,13 @@ class EncoderSyntaxEnhanced(nn.Module):
     def __init__(self) -> None:
         super(EncoderSyntaxEnhanced, self).__init__()
 
-    def forward(self):
+    def forward(self, inputs, syntax_tokens, seq_lens):
+        embedding = self.embedding(inputs)
+        # TODO syntax enhanced
+        enc_states, hidden = self.bilstm(inputs=embedding, seq_lens=seq_lens)
+        enc_states = enc_states.contiguous()
 
-        return
+        return enc_states, hidden
 
 
 class EncoderBertEnhanced(nn.Module):

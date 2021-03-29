@@ -15,8 +15,6 @@ if __name__ == "__main__":
     train_dataset = TTDataset(vocab=vocab, data_file=config.train_data_file)
     val_dataset = TTDataset(vocab=vocab, data_file=config.val_data_file)
 
-    # train_dataset, val_dataset = train_val_split(train_dataset=dataset, val_ratio=val_ratio)
-
     sp_collator = SortPadCollator(sort_key=lambda x:x[4], ignore_indics=[3, 4, 5]) 
 
     train_iter = DataLoader(dataset=train_dataset,  
@@ -31,10 +29,7 @@ if __name__ == "__main__":
 
     model = PointerGenerator(config=config, vocab_size=len(vocab), mode="baseline")
 
-    model_state_dict = model.state_dict()
     trainer = MyTrainer(config=config)
 
     trainer.train(model=model, train_iter=train_iter, val_iter=val_iter)
     trainer.save_model(model=model, save_file=config.model_file)
-
-    print()

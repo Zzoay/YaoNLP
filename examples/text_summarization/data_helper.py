@@ -142,6 +142,9 @@ class Vocab(object):
     
     def get_vocab(self):
         return self._vocab
+    
+    def size(self):
+        return len(self._vocab)
 
 
 if __name__ == "__main__":
