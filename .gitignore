@@ -142,7 +142,12 @@ data/ctb8.0
 data/mr
 data/SDRN_DATA
 data/TTNewsCorpus_NLPCC2017
+data/CNNDailyMail
+data/ptb
 
 pretrained_model/bert
 pretrained_model/bert-base-uncased
 pretrained_model/dependency_parser
+
+examples/text_summarization/log
+examples/text_summarization/models

@@ -2,21 +2,13 @@
 import torch
 from torch import nn
 from torch.nn import functional as F
+from torch.nn import init
 
 from yaonlp.layers import BiLSTM
 from yaonlp.utils import to_cuda
 
 
 class PointerGenerator(nn.Module):
-    # def __init__(self,
-    #              input_size, 
-    #              hidden_size,
-    #              vocab_size,
-    #              emb_dim,
-    #              dropout,
-    #              use_cuda,
-    #              mode = "baseline",
-    #              model_file = None) -> None:
     def __init__(self,
                  config,
                  vocab_size,
@@ -62,6 +54,7 @@ class PointerGenerator(nn.Module):
                 enc_inputs_extend,
                 oov_nums,
                 dec_inputs, 
+                dec_tags,
                 dec_lens,
                 max_len=150):
         batch_size, seq_len = enc_inputs.size()
@@ -92,7 +85,11 @@ class PointerGenerator(nn.Module):
                              prev_context_vector=context_vector,
                              prev_coverage=coverage_vector)
             
-            gold_probs = final_dist.gather(1, dec_prev.unsqueeze(1)).squeeze()  # (batch_size, )
+            tag = dec_tags[:, step]
+            if self.use_cuda and torch.cuda.is_available():
+                tag = tag.cuda()
+
+            gold_probs = final_dist.gather(1, tag.unsqueeze(1)).squeeze()  # (batch_size, )
             step_loss = -torch.log(gold_probs)
 
             if self.use_coverage:
@@ -118,7 +115,7 @@ class EncoderBase(nn.Module):
                  emb_dim,
                  hidden_size, 
                  dropout) -> None:
-        super(EncoderBased, self).__init__()
+        super(EncoderBase, self).__init__()
         self.embedding = nn.Embedding(num_embeddings=vocab_size, 
                                       embedding_dim=emb_dim)
 
@@ -127,6 +124,11 @@ class EncoderBase(nn.Module):
                              num_layers=1, 
                              batch_first=True, 
                              dropout=dropout)
+
+        # self.reset_parameters()
+
+    def reset_parameters(self):
+        init.normal_(self.embedding.weight)
 
     def forward(self, inputs, seq_lens):
         embedding = self.embedding(inputs)
@@ -141,6 +143,12 @@ class EncoderSyntaxEnhanced(nn.Module):
     def __init__(self) -> None:
         super(EncoderSyntaxEnhanced, self).__init__()
 
+
+        self.reset_parameters()
+
+    def reset_parameters(self):
+
+        return
     def forward(self, inputs, syntax_tokens, seq_lens):
         embedding = self.embedding(inputs)
         # TODO syntax enhanced
@@ -153,6 +161,13 @@ class EncoderSyntaxEnhanced(nn.Module):
 class EncoderBertEnhanced(nn.Module):
     def __init__(self) -> None:
         super(EncoderBertEnhanced, self).__init__()
+
+        self.reset_parameters()
+
+    def reset_parameters(self):
+
+        return
+
     def forward(self):
 
         return
@@ -161,7 +176,14 @@ class EncoderBertEnhanced(nn.Module):
 class EncoderJointEnhanced(nn.Module):
     def __init__(self) -> None:
         super(EncoderJointEnhanced, self).__init__()
-    
+        
+        
+        self.reset_parameters()
+
+    def reset_parameters(self):
+
+        return
+
     def forward(self):
 
         return
@@ -175,6 +197,12 @@ class ReduceState(nn.Module):
 
         self.reduce_h = nn.Linear(hidden_size * 2, hidden_size)
         self.reduce_c = nn.Linear(hidden_size * 2, hidden_size)
+
+        # self.reset_parameters()
+
+    def reset_parameters(self):
+        init.normal_(self.reduce_h.weight)
+        init.normal_(self.reduce_c.weight)
 
     def forward(self, enc_hidden):
         h, c = enc_hidden  # from bilstm, both with shape (2, batch_size, hidden_size)
@@ -200,6 +228,14 @@ class Attention(nn.Module):
         self.W_c = nn.Linear(1, hidden_size * 2)  # coverage projection
 
         self.v = nn.Linear(hidden_size*2, 1, bias=False)
+
+        # self.reset_parameters()
+
+    def reset_parameters(self):
+        init.normal_(self.W_h.weight)
+        init.normal_(self.W_s.weight)
+        init.normal_(self.W_c.weight)
+        init.normal_(self.v.weight)
 
     def forward(self, dec_in_state, enc_states, coverage_vector):
         batch_size, seq_len, _ = enc_states.size() 
@@ -273,7 +309,16 @@ class Decoder(nn.Module):
         self.p_vocab2 = nn.Linear(hidden_size, vocab_size)
 
         self.p_gen = nn.Linear(hidden_size * 4 + emb_dim, 1)
+
+        # self.reset_parameters()
     
+    def reset_parameters(self):
+        init.normal_(self.embedding.weight)
+        init.normal_(self.x_context.weight)
+        init.normal_(self.p_vocab1.weight)
+        init.normal_(self.p_vocab2.weight)
+        init.normal_(self.p_gen.weight)
+
     def forward(self, 
                 prev_target,
                 prev_dec_state, 
@@ -282,6 +327,13 @@ class Decoder(nn.Module):
                 oov_nums, 
                 prev_context_vector, 
                 prev_coverage):
+        # if (not self.training) and (self.sign == 0):
+        #     h_decoder, c_decoder = s_t_1
+        #     dec_state_hat = torch.cat((h_decoder.view(-1, config.hidden_dim),
+        #                          c_decoder.view(-1, config.hidden_dim)), 1)  # B x 2*hidden_dim
+        #     c_t, _, coverage = self.attention_network(s_t_hat, encoder_outputs, encoder_feature,
+        #                                                       enc_padding_mask, coverage)
+        #     prev_coverage = coverage
         batch_size, seq_len, _ = enc_states.size()
         # decoder state 's_t'  
         target_emb = self.embedding(prev_target)

@@ -29,13 +29,13 @@ if __name__ == "__main__":
     parser.add_argument('--model_dir', type=str, default=f"./model/{dataset_default}")
     parser.add_argument('--eval_dir', type=str, default=f"./eval/{dataset_default}")
 
-    parser.add_argument('--bert_path', type=str, default=r"pretrained_model\bert-base-uncased")
+    parser.add_argument('--bert_path', type=str, default=r"/home/jgy/YaoNLP/pretrained_model/bert-base-uncased")
     parser.add_argument('--bert_json_dir', 
                         type=str,
-                        default=r"pretrained_model\bert-base-uncased\config.json")
+                        default=r"/home/jgy/YaoNLP/pretrained_model/bert-base-uncased/config.json")
     parser.add_argument('--bert_checkpoint_dir', 
                         type=str,
-                        default=r"pretrained_model\bert-base-uncased\pytorch_model.bin")
+                        default=r"/home/jgy/YaoNLP/pretrained_model/bert-base-uncased/pytorch_model.bin")
 
     parser.add_argument('--tagScheme', type=str, default="BIO")
     parser.add_argument('--ifgpu', type=bool, default=False)
@@ -57,8 +57,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    tokenizer = BertTokenizer.from_pretrained(r"pretrained_model\bert-base-uncased")
-    train_dataset = MyDataSet(args=args, filename=r"data\SDRN_DATA\original_data\2014LapStandard.train")
+    tokenizer = BertTokenizer.from_pretrained(r"/home/jgy/YaoNLP/pretrained_model/bert-base-uncased")
+    train_dataset = MyDataSet(args=args, filename=r"/home/jgy/YaoNLP/data/SDRN_DATA/original_data/2014LapStandard.train")
 
     collator = TokenizedCollator(tokenizer, token_idx=0, label_idx=1, sort_key=lambda x:x[3])
     dataloader = MyDataLoader(train_dataset, args=args, collate_fn=collator)

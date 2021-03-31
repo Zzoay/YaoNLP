@@ -20,7 +20,7 @@ class TTDataset(Dataset):
         if use_syn_enhance:
             self.tokenizer = ParserTokenizer(vocab_file=parser_vocab_file)
 
-        self.summ_lst, self.article_lst, self.article_extend_lst, self.summ_lens, self.article_lens, self.oov_nums = self.read_data(vocab, data_file)
+        self.summ_lst, self.summ_tag_lst, self.article_lst, self.article_extend_lst, self.summ_lens, self.article_lens, self.oov_nums = self.read_data(vocab, data_file)
 
     def read_data(self, 
                   vocab: dict,
@@ -29,6 +29,7 @@ class TTDataset(Dataset):
                   max_article_len: int = 800) -> tuple:
         with open(self.data_file, 'r', encoding='utf-8') as f:
             summ_lst = list()
+            summ_tag_lst = list()
             article_lst = list()
             article_extend_lst = list()
 
@@ -40,13 +41,15 @@ class TTDataset(Dataset):
                 summ = line_dct['summarization']
                 article = line_dct['article']
 
-                summ_ids = [vocab.get(x, 0) for x in summ]
+                summ_ids = [vocab.get(x, vocab['<unk>']) for x in summ]
                 # article_ids = [vocab.get(x, 0) for x in article]
                 article_ids, article_extend_vocab, oovs = self.article2ids(vocab, article)  # extend oov
 
                 # truncation
                 article_ids, article_len = self.truncate(article_ids, max_article_len)
-                summ_ids, summ_len = self.truncate(summ_ids, max_summ_len)
+                # summ_ids, summ_len = self.truncate(summ_ids, max_summ_len)
+                # summ_tag_ids = summ_ids
+                summ_ids, summ_tag_ids, summ_len = self.get_dec_input_target(summ_ids, max_summ_len, vocab['<start>'], vocab['<end>'])
                 article_extend_vocab, _ = self.truncate(article_extend_vocab, max_article_len)
 
                 summ_lens.append(summ_len)
@@ -55,10 +58,11 @@ class TTDataset(Dataset):
                 oov_nums.append(len(oovs))
 
                 summ_lst.append(torch.tensor(summ_ids))
+                summ_tag_lst.append(torch.tensor(summ_tag_ids))
                 article_lst.append(torch.tensor(article_ids))
                 article_extend_lst.append(torch.tensor(article_extend_vocab).long())
             
-            return summ_lst, article_lst, article_extend_lst, summ_lens, article_lens, oov_nums
+            return summ_lst, summ_tag_lst, article_lst, article_extend_lst, summ_lens, article_lens, oov_nums
     
     # extend oov
     def article2ids(self, vocab, article):
@@ -78,6 +82,18 @@ class TTDataset(Dataset):
                 extend_ids.append(len(vocab) + oov_num)  # extend
         return ids, extend_ids, oovs
 
+    # add <start> and <end> tag, and truncation
+    def get_dec_input_target(self, summ_ids, max_length, start_id, end_id):
+        ids = [start_id] + summ_ids[:]
+        target = summ_ids[:]
+
+        ids, ids_lens = self.truncate(ids, max_length)
+
+        if len(ids) > max_length: # truncate
+            target = target[:max_length] # no end_token
+        else: # no truncation
+            target.append(end_id) # end token
+        return ids, target, ids_lens
 
     def truncate(self, ids_list, max_length):
         length = len(ids_list)
@@ -88,7 +104,7 @@ class TTDataset(Dataset):
         return ids_list, length
         
     def __getitem__(self, idx):
-        return self.summ_lst[idx], self.article_lst[idx], self.article_extend_lst[idx], self.summ_lens[idx], self.article_lens[idx], self.oov_nums[idx]
+        return self.summ_lst[idx], self.summ_tag_lst[idx], self.article_lst[idx],  self.article_extend_lst[idx], self.summ_lens[idx], self.article_lens[idx], self.oov_nums[idx]
     
     def __len__(self):
         return len(self.article_lst)
@@ -99,8 +115,8 @@ class Vocab(object):
         self.vocab_file = vocab_file
         self.min_freq = min_freq
 
-        self._vocab = self.read_vocab()
-    
+        self._vocab, self.id2word = self.read_vocab()
+
     def build_vocab(self):
         cnt = None
         with open(self.data_file, 'r', encoding='utf-8') as f:
@@ -123,7 +139,12 @@ class Vocab(object):
     def read_vocab(self):
         with open(self.vocab_file, 'r', encoding='utf-8') as f:
             char_dct = dict()
-            cnt = 1
+            char_dct['<pad>'] = 0
+            # char_dct['<unk>'] = 1
+            char_dct['<start>'] = 1
+            char_dct['<end>'] = 2
+
+            cnt = 3
             for line in f.readlines():
                 try:
                     character, freq = line.split(' ')
@@ -134,11 +155,10 @@ class Vocab(object):
                     break
                 char_dct[character] = cnt
                 cnt+=1
-
             # add <PAD>, <UNK> token
-            char_dct['<pad>'] = 0
+            # char_dct['<pad>'] = 0
             char_dct['<unk>'] = cnt-1
-            return char_dct
+            return char_dct, list([item[0] for item in char_dct.items()])
     
     def get_vocab(self):
         return self._vocab
@@ -146,6 +166,15 @@ class Vocab(object):
     def size(self):
         return len(self._vocab)
 
+def ids2words(ids, id2word):
+    res = []
+    for i in ids:
+        if i > len(id2word): # OOV
+            res.append(id2word[-1])
+        else:
+            res.append(id2word[i])
+    return res
+    
 
 if __name__ == "__main__":
     s_time = time.time()

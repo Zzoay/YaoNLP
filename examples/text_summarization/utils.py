@@ -12,10 +12,10 @@ def print_results(article, abstract, decoded_output):
   print( "")
 
 
-def make_html_safe(s):
-  s.replace("<", "&lt;")
-  s.replace(">", "&gt;")
-  return s
+# def make_html_safe(s):
+#   s.replace("<", "&lt;")
+#   s.replace(">", "&gt;")
+#   return s
 
 
 def rouge_eval(ref_dir, dec_dir):
@@ -75,8 +75,8 @@ def write_for_rouge(reference_sents, decoded_words, ex_index,
 
   # pyrouge calls a perl script that puts the data into HTML files.
   # Therefore we need to make our output HTML safe.
-  decoded_sents = [make_html_safe(w) for w in decoded_sents]
-  reference_sents = [make_html_safe(w) for w in reference_sents]
+  # decoded_sents = [make_html_safe(w) for w in decoded_sents]
+  # reference_sents = [make_html_safe(w) for w in reference_sents]
 
   ref_file = os.path.join(_rouge_ref_dir, "%06d_reference.txt" % ex_index)
   decoded_file = os.path.join(_rouge_dec_dir, "%06d_decoded.txt" % ex_index)
