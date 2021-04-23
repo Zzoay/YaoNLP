@@ -5,6 +5,7 @@ sys.path.append(r".")   # add the YAONLP path
 import os
 import time
 
+from rouge import Rouge
 import torch
 from torch.autograd import Variable
 
@@ -14,7 +15,7 @@ from model import PointerGenerator
 from utils import write_for_rouge, rouge_eval, rouge_log
 
 from yaonlp.data import train_val_split, DataLoader, SortPadCollator
-from yaonlp.utils import to_cuda
+from yaonlp.utils import to_cuda, set_seed
 
 use_cuda = config.use_cuda and torch.cuda.is_available()
 
@@ -76,6 +77,7 @@ class BeamSearch(object):
             if use_cuda and torch.cuda.is_available():
                 summ, article, article_extend = to_cuda(data=(summ, article, article_extend))
             
+            airticle_words = ids2words(article[0].squeeze()[1:], self.id2word) 
             # Run beam search to get best Hypothesis
             best_summary = self.beam_search(enc_inputs=article, 
                                 enc_lens=article_lens,  
@@ -93,19 +95,29 @@ class BeamSearch(object):
 
             # Remove the [STOP] token from decoded_words, if necessary
             try:
-                fst_stop_idx = decoded_words.index(self.vocab['<end>'])
+                fst_stop_idx = decoded_words.index('<end>')
                 decoded_words = decoded_words[:fst_stop_idx]
             except ValueError:
                 decoded_words = decoded_words
 
             original_abstract_sents = ids2words(summ[0].squeeze()[1:], self.id2word)  # summary repeat beam_size time
 
-            # pyrouge don't support chinese, need to use token
-            decoded_words = [str(ids) for ids in output_ids]
-            original_abstract_sents = [str(ids) for ids in summ[0].squeeze()[1:].tolist()]
+            decoded_words = "".join(decoded_words)
+            original_abstract_sents = "".join(original_abstract_sents)
 
-            write_for_rouge(original_abstract_sents, decoded_words, counter,
-                            self._rouge_ref_dir, self._rouge_dec_dir)
+            rouge = Rouge()
+            rouge_score= rouge.get_scores(decoded_words[:len(original_abstract_sents)], original_abstract_sents)
+
+            rouge_1 = rouge_score[0]["rouge-1"]
+            rouge_2 = rouge_score[0]["rouge-2"]
+            rouge_l = rouge_score[0]["rouge-l"]
+
+            # pyrouge don't support chinese, need to use token
+            # decoded_words = [str(ids) for ids in output_ids]
+            # original_abstract_sents = [str(ids) for ids in summ[0].squeeze()[1:].tolist()]
+
+            # write_for_rouge(original_abstract_sents, decoded_words, counter,
+            #                 self._rouge_ref_dir, self._rouge_dec_dir)
             counter += 1
             if counter % 1000 == 0:
                 print('%d example in %d sec'%(counter, time.time() - start))
@@ -182,8 +194,8 @@ class BeamSearch(object):
                     all_coverage.append(h.coverage)
                 coverage_t_1 = torch.stack(all_coverage, 0)
 
-            if use_cuda:
-                coverage_t_1 = coverage_t_1.cuda()  # (beam_size, seq_len)
+                if use_cuda:
+                    coverage_t_1 = coverage_t_1.cuda()  # (beam_size, seq_len)
 
             final_dist, dec_state, h_star_t, attn_dist, p_gen, next_coverage =  \
                 self.model.decoder(prev_target=y_t_1, 
@@ -192,7 +204,7 @@ class BeamSearch(object):
                                    enc_input_extend=enc_inputs_extend,
                                    oov_nums=oov_nums,
                                    prev_context_vector=c_t_1,
-                                   prev_coverage=coverage_t_1)
+                                   coverage=coverage_t_1)
 
             log_probs = torch.log(final_dist)  # (beam_size, vocab_size)
             topk_log_probs, topk_ids = torch.topk(log_probs, config.beam_size * 2)  # (beam_size, beam_size * 2), (beam_size, beam_size * 2)
@@ -237,15 +249,17 @@ class BeamSearch(object):
         return beams_sorted[0]
 
 if __name__ == '__main__':
+    set_seed(config.random_seed)
+
     sp_collator = SortPadCollator(sort_key=lambda x:x[5], ignore_indics=[4, 5, 6]) 
 
     vocab, id2word = Vocab(data_file=config.train_data_file, vocab_file=config.vocab_file).read_vocab()
-    val_dataset = TTDataset(vocab=vocab, data_file=config.val_data_file)
+    val_dataset = TTDataset(config=config, vocab=vocab, data_file=config.val_data_file)
     val_iter = DataLoader(dataset=val_dataset,  
                          batch_size=1, 
                         shuffle=config.shuffle, 
                         collate_fn=sp_collator)
 
-    beam_Search_processor = BeamSearch(config.model_file, vocab, id2word)
+    beam_Search_processor = BeamSearch(model_file_path="examples/text_summarization/models/model_epoch4.pt", vocab=vocab, id2word=id2word)
     beam_Search_processor.decode(val_iter)
 

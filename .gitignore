@@ -144,10 +144,12 @@ data/SDRN_DATA
 data/TTNewsCorpus_NLPCC2017
 data/CNNDailyMail
 data/ptb
+data/TTNews_Processed
 
 pretrained_model/bert
 pretrained_model/bert-base-uncased
 pretrained_model/dependency_parser
+pretrained_model/bert-base-chinese
 
 examples/text_summarization/log
 examples/text_summarization/models

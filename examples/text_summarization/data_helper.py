@@ -1,32 +1,38 @@
 
 import torch
 from torch.utils.data import Dataset
+from transformers import BertTokenizer
 
 from collections import Counter
 import time
 
 from syntax_enhance.tokenizer import ParserTokenizer
+import config
 
 
 class TTDataset(Dataset):
     def __init__(self, 
+                 config,
                  vocab: dict, 
-                 data_file: str, 
-                 use_syn_enhance: bool = False, 
-                 parser_vocab_file: str = '') -> None:
+                 data_file: str) -> None:
         self.data_file = data_file
+        self.max_summ_len = config.max_summ_len
+        self.max_article_len = config.max_article_len
 
-        self.use_syn_enhance = use_syn_enhance
-        if use_syn_enhance:
-            self.tokenizer = ParserTokenizer(vocab_file=parser_vocab_file)
+        self.use_syn_enhanced = config.use_syn_enhanced
+        if self.use_syn_enhanced:
+            self.syn_tokenizer = ParserTokenizer(vocab_file=config.parser_vocab_file)
+        
+        self.use_bert_enhanced = config.use_bert_enhanced
+        if self.use_bert_enhanced:
+            self.bert_tokenizer = BertTokenizer.from_pretrained(config.bert_tokenizer_file)
 
         self.summ_lst, self.summ_tag_lst, self.article_lst, self.article_extend_lst, self.summ_lens, self.article_lens, self.oov_nums = self.read_data(vocab, data_file)
 
     def read_data(self, 
                   vocab: dict,
-                  data_file: str, 
-                  max_summ_len: int = 200, 
-                  max_article_len: int = 800) -> tuple:
+                  data_file: str) -> tuple:
+        article_bert_tokens, article_syntax_tokens = list(), list()
         with open(self.data_file, 'r', encoding='utf-8') as f:
             summ_lst = list()
             summ_tag_lst = list()
@@ -41,16 +47,32 @@ class TTDataset(Dataset):
                 summ = line_dct['summarization']
                 article = line_dct['article']
 
+                # summ = summ.split()
+                # article = article.split()
+                # summ_cut = list(self.syn_tokenizer.segment(summ))
+                # article_cut = list(self.syn_tokenizer.segment(article))
+
                 summ_ids = [vocab.get(x, vocab['<unk>']) for x in summ]
                 # article_ids = [vocab.get(x, 0) for x in article]
                 article_ids, article_extend_vocab, oovs = self.article2ids(vocab, article)  # extend oov
 
                 # truncation
-                article_ids, article_len = self.truncate(article_ids, max_article_len)
-                # summ_ids, summ_len = self.truncate(summ_ids, max_summ_len)
+                article_ids, article_len = self.truncate(article_ids, self.max_article_len)
+                # summ_ids, summ_len = self.truncate(summ_ids, self.max_summ_len)
                 # summ_tag_ids = summ_ids
-                summ_ids, summ_tag_ids, summ_len = self.get_dec_input_target(summ_ids, max_summ_len, vocab['<start>'], vocab['<end>'])
-                article_extend_vocab, _ = self.truncate(article_extend_vocab, max_article_len)
+                summ_ids, summ_tag_ids, summ_len = self.get_dec_input_target(summ_ids, self.max_summ_len, vocab['<start>'], vocab['<end>'])
+                article_extend_vocab, _ = self.truncate(article_extend_vocab, self.max_article_len)
+
+                # TODO dependency parser
+
+
+                # TODO bert
+                if self.use_bert_enhanced:
+                    input_ids, segment_ids, input_masks = self.bert_tokenizer(article,
+                                                                                padding=True,
+                                                                                truncation=True,
+                                                                                return_tensors="pt").values()
+                    article_bert_tokens.append((input_ids, segment_ids, input_masks))
 
                 summ_lens.append(summ_len)
                 article_lens.append(article_len)
@@ -61,6 +83,7 @@ class TTDataset(Dataset):
                 summ_tag_lst.append(torch.tensor(summ_tag_ids))
                 article_lst.append(torch.tensor(article_ids))
                 article_extend_lst.append(torch.tensor(article_extend_vocab).long())
+            
             
             return summ_lst, summ_tag_lst, article_lst, article_extend_lst, summ_lens, article_lens, oov_nums
     
@@ -113,7 +136,7 @@ class Vocab(object):
     def __init__(self, data_file, vocab_file, min_freq=4):
         self.data_file = data_file
         self.vocab_file = vocab_file
-        self.min_freq = min_freq
+        self.min_freq = 20  # TODO configurable
 
         self._vocab, self.id2word = self.read_vocab()
 
@@ -147,10 +170,12 @@ class Vocab(object):
             cnt = 3
             for line in f.readlines():
                 try:
-                    character, freq = line.split(' ')
+                    character, freq = line.strip().split(' ')
                 except ValueError:
                     continue
                 # vocab file sorted already
+                if config.use_syn_enhanced and (character in ['<pad>', '<root>', '<unk>']):
+                    continue
                 if int(freq) < self.min_freq:    
                     break
                 char_dct[character] = cnt
@@ -169,7 +194,7 @@ class Vocab(object):
 def ids2words(ids, id2word):
     res = []
     for i in ids:
-        if i > len(id2word): # OOV
+        if i >= len(id2word): # OOV
             res.append(id2word[-1])
         else:
             res.append(id2word[i])

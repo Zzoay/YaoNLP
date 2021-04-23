@@ -8,12 +8,15 @@ from trainer import MyTrainer
 import config
 
 from yaonlp.data import train_val_split, DataLoader, SortPadCollator
+from yaonlp.utils import set_seed
 
 
 if __name__ == "__main__":
+    set_seed(config.random_seed)
+
     vocab = Vocab(data_file=config.train_data_file, vocab_file=config.vocab_file).get_vocab()
-    train_dataset = TTDataset(vocab=vocab, data_file=config.train_data_file)
-    val_dataset = TTDataset(vocab=vocab, data_file=config.val_data_file)
+    train_dataset = TTDataset(config=config, vocab=vocab, data_file=config.train_data_file)
+    val_dataset = TTDataset(config=config, vocab=vocab, data_file=config.val_data_file)
 
     sp_collator = SortPadCollator(sort_key=lambda x:x[5], ignore_indics=[4, 5, 6]) 
 

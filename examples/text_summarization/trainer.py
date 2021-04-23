@@ -2,14 +2,17 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+from torch.nn.utils import clip_grad_norm_
 from torch.optim import Adam
 
 from yaonlp.trainer import Trainer
 from yaonlp.utils import to_cuda
 
+
 class MyTrainer(Trainer):
     def __init__(self, config)-> None:
         self.epochs = config.epochs
+        self.max_grad_norm = config.max_grad_norm
         self.prt_erery_step = config.prt_erery_step 
         self.eval_every_step = config.eval_every_step
         self.use_cuda = config.use_cuda
@@ -19,7 +22,7 @@ class MyTrainer(Trainer):
         if self.use_cuda and torch.cuda.is_available():
             model = model.cuda()
 
-        optim = Adam(model.parameters())
+        self.optim = Adam(model.parameters())
 
         step = 0
         for epoch in range(1, self.epochs + 1):
@@ -28,7 +31,7 @@ class MyTrainer(Trainer):
                 if self.use_cuda and torch.cuda.is_available():
                     summ, article, article_extend = to_cuda(data=(summ, article, article_extend))
 
-                optim.zero_grad()
+                self.optim.zero_grad()
 
                 loss = model(enc_inputs=article, 
                              enc_lens=article_lens,  
@@ -47,12 +50,13 @@ class MyTrainer(Trainer):
                     model.train()
 
                 loss.backward()
-                
-                optim.step()
+                clip_grad_norm_(model.parameters(), self.max_grad_norm)
+                self.optim.step()
 
                 step += 1
+            self.save_model(model, save_file=f"examples/text_summarization/models/model_epoch{epoch}.pt")
         self.eval(model, val_iter)
-        self.optim = optim
+
 
     def eval(self, model: nn.Module, test_iter: DataLoader) -> None:
         model.eval()

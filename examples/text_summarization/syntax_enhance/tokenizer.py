@@ -5,7 +5,7 @@ class ParserTokenizer():
     def __init__(self, vocab_file)-> None:
         self.min_freq = 2  # TODO configurable
 
-        self.vocab_file = self.read_vocab(vocab_file=vocab_file)
+        self.vocab = self.read_vocab(vocab_file=vocab_file)
         self.cutter_init(filename=vocab_file)
 
     def cutter_init(self, filename):
@@ -16,19 +16,26 @@ class ParserTokenizer():
         ids = word2ids(seg_list)
         return ids
 
-    def word2ids(self, vocab, word_list):
+    def segment(self, sentence):
+        return jieba.cut(sentence)
+
+    def word2ids(self, word_list):
         ids = []
         for word in word_list:
             try:
-                idx = vocab[word]
+                idx = self.vocab[word]
                 ids.append(idx)
             except KeyError:
-                ids.append(vocab['<unk>'])
+                ids.append(self.vocab['<unk>'])
 
     def read_vocab(self, vocab_file):
         with open(vocab_file, 'r', encoding='utf-8') as f:
             char_dct = dict()
-            cnt = 0
+            char_dct['<pad>'] = 0
+            # char_dct['<unk>'] = 1
+            char_dct['<start>'] = 1
+            char_dct['<end>'] = 2
+            cnt = 3
             for line in f.readlines():
                 try:
                     character, freq = line.split(' ')
