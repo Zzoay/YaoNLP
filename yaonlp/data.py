@@ -5,27 +5,54 @@ from torch.utils.data._utils import collate
 import torch.nn.utils.rnn as rnn_utils
 
 import os
-from typing import List, Callable, Optional, Any, Union
+from typing import List, Callable, Optional, Any, Union, Tuple
+from abc import ABCMeta, abstractmethod
 
 
-# class MyDataLoader(DataLoader):
-#     def __init__(self, dataset, config, collate_fn: Callable[[List[Any]], Any] = collate.default_collate) -> None:
-#         super(MyDataLoader, self).__init__(
-#             dataset, 
-#             batch_size=config["batch_size"], 
-#             shuffle=config["shuffle"],
-#             collate_fn=collate_fn)
-#         # self.data_size = len(self.dataset)
+class Vocab():
+    def __init__(self):
+        self.token2idx = dict()
+        self.idx2token = list()
+    
+    def build_from_twolist(self, tokens, idcs):
+        self.token2idx = dict(*zip(tokens, idcs))
+        self.idx2token = idcs
+    
+    def build_from_dict(self, token_dct):
+        self.token2idx = token_dct
+        self.idx2token = list(token_dct.keys())
+    
+    def get_token_idx(self, token):
+        return self.token2idx[token]
+    
+    def get_token_from_idx(self, idx):
+        return self.idx2token[idx]
 
 
-def train_val_split(train_dataset: Dataset, val_ratio: float) -> List: # List[Subset] actually
-    size = len(train_dataset)
+def train_val_split(train_dataset: Dataset, val_ratio: float, shuffle: bool = True) -> List: # Tuple[Subset] actually
+    size = len(train_dataset)  # type: ignore
     val_size = int(size * val_ratio)
     train_size = size - val_size
-    return random_split(train_dataset, (train_size, val_size), None)
+    if shuffle:
+        return random_split(train_dataset, (train_size, val_size), None)
+    else:
+        return [train_dataset[:train_size], train_dataset[train_size:]]
 
 
-class SortPadCollator():
+class Collator():
+    def __init__(self):
+        __metaclass__ = ABCMeta
+    
+    @abstractmethod
+    def _collate_fn(self, batch):
+        raise NotImplementedError
+
+    @abstractmethod
+    def __call__(self, batch):
+        return self._collate_fn(batch)
+
+
+class SortPadCollator(Collator):
     def __init__(self, sort_key: Callable, ignore_indics: Union[int, list] = [], reverse: bool = True):
         self.sort_key = sort_key
         self.ignore_indics = ignore_indics
