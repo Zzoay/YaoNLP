@@ -80,11 +80,10 @@ class BeamSearch(object):
             airticle_words = ids2words(article[0].squeeze()[1:], self.id2word) 
             # Run beam search to get best Hypothesis
             best_summary = self.beam_search(enc_inputs=article, 
-                                enc_lens=article_lens,  
-                                enc_inputs_extend=article_extend,
-                                oov_nums=oov_nums,
-                                dec_inputs=summ, 
-                                dec_lens=summ_lens)
+                                            enc_lens=article_lens,  
+                                            enc_inputs_extend=article_extend,
+                                            oov_nums=oov_nums,
+                                            dec_lens=summ_lens)
 
             # Extract the output ids from the hypothesis and convert back to words
             output_ids = [int(t) for t in best_summary.tokens[1:]]
@@ -107,6 +106,7 @@ class BeamSearch(object):
 
             rouge = Rouge()
             rouge_score= rouge.get_scores(decoded_words[:len(original_abstract_sents)], original_abstract_sents)
+            rouge_score = rouge.get_scores(str(output_ids), str(summ[0].squeeze()[1:]))
 
             rouge_1 = rouge_score[0]["rouge-1"]
             rouge_2 = rouge_score[0]["rouge-2"]
@@ -133,7 +133,6 @@ class BeamSearch(object):
                     enc_lens, 
                     enc_inputs_extend,
                     oov_nums,
-                    dec_inputs, 
                     dec_lens,
                     max_len=150):
         #batch should have only one example
@@ -204,7 +203,9 @@ class BeamSearch(object):
                                    enc_input_extend=enc_inputs_extend,
                                    oov_nums=oov_nums,
                                    prev_context_vector=c_t_1,
-                                   coverage=coverage_t_1)
+                                   coverage=coverage_t_1,
+                                   dec_lens=dec_lens,
+                                   enc_lens=enc_lens)
 
             log_probs = torch.log(final_dist)  # (beam_size, vocab_size)
             topk_log_probs, topk_ids = torch.topk(log_probs, config.beam_size * 2)  # (beam_size, beam_size * 2), (beam_size, beam_size * 2)
@@ -260,6 +261,6 @@ if __name__ == '__main__':
                         shuffle=config.shuffle, 
                         collate_fn=sp_collator)
 
-    beam_Search_processor = BeamSearch(model_file_path="examples/text_summarization/models/model_epoch4.pt", vocab=vocab, id2word=id2word)
+    beam_Search_processor = BeamSearch(model_file_path="examples/text_summarization/models/model.pt", vocab=vocab, id2word=id2word)
     beam_Search_processor.decode(val_iter)
 

@@ -23,7 +23,6 @@ class PointerGenerator(nn.Module):
         self.dropout = config.dropout
         self.use_cuda = config.use_cuda
 
-        # TODO configurable
         self.coverage_loss_weight = config.coverage_loss_weight # lambda, equation 13
 
         self.use_coverage =  config.use_coverage
@@ -301,7 +300,7 @@ class Attention(nn.Module):
             enc_pad_mask = enc_pad_mask.cuda()
 
         # calculate attention distribution 'a', equation 2
-        attn_dist_ = F.softmax(e, dim=1) * enc_pad_mask  # (batch_size, seq_len) TODO: encoding mask
+        attn_dist_ = F.softmax(e, dim=1) * enc_pad_mask  # (batch_size, seq_len) 
         normalization_factor = attn_dist_.sum(1, keepdim=True)
         attn_dist = attn_dist_ / normalization_factor  # (batch_size, seq_len)
 
