@@ -5,7 +5,7 @@ from torch.nn import functional as F
 from torch.nn import init
 
 from yaonlp.layers import BiLSTM
-from yaonlp.utils import to_cuda, sequence_mask
+from yaonlp.utils import to_cuda, seq_mask_by_lens
 
 from syntax_enhance.syntax_encoder import SyntaxReprs
 
@@ -103,7 +103,7 @@ class PointerGenerator(nn.Module):
             step_losses.append(step_loss)
 
         # mask
-        dec_masks = sequence_mask(dec_lens)
+        dec_masks = seq_mask_by_lens(dec_lens)
         if self.use_cuda and torch.cuda.is_available():
             dec_masks = dec_masks.cuda()
 
@@ -295,7 +295,7 @@ class Attention(nn.Module):
         e = self.v(e)  # (batch_size * seq_len, 1)
         e = e.view(-1, seq_len)  # (batch_size, seq_len)
 
-        enc_pad_mask = sequence_mask(enc_lens)
+        enc_pad_mask = seq_mask_by_lens(enc_lens)
         if self.use_cuda and torch.cuda.is_available():
             enc_pad_mask = enc_pad_mask.cuda()
 
